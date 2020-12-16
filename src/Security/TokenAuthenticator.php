@@ -2,7 +2,7 @@
 
 namespace App\Security;
 
-use App\Entity\User;
+use App\Entity\UserTokens;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -38,20 +38,28 @@ class TokenAuthenticator extends AbstractGuardAuthenticator
      */
     public function getCredentials(Request $request)
     {
-        return $request->headers->get('Token');
+        return $request;// $request->headers->get('Token');
     }
 
     public function getUser($credentials, UserProviderInterface $userProvider)
     {
+        $request = $credentials;
+        $credentials = $request->headers->get('Token');
         if (null === $credentials) {
             // The token header was empty, authentication fails with HTTP Status
             // Code 401 "Unauthorized"
             return null;
         }
 
-        // if a User is returned, checkCredentials() is called
-        return $this->em->getRepository(User::class)
-            ->findOneBy(['apiToken' => $credentials]);
+        $user = $this->em->getRepository(UserTokens::class)
+            ->getUserAuthenticated(
+                $credentials,
+                $request->headers->get("origin"),
+                $request->headers->get("user-agent"),
+                $request->headers->get("username")
+            );
+        if(!$user) return null;
+        return $user->getUser();
     }
 
     public function checkCredentials($credentials, UserInterface $user)

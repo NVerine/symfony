@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\GrupoUsuarios;
 use App\Entity\Pessoa;
 use App\Entity\User;
+use App\Entity\UserTokens;
 use App\Service\Notify;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -45,20 +46,47 @@ class SecurityController extends AbstractController
         }
 
         $date = new \DateTime();
-        $usuario->setLoginDate($date);
-        $usuario->setApiToken($random);
+
+        $token = new UserTokens();
+        $token->setUser($usuario);
+        $token->setData($date);
+        $token->setOrigin($request->headers->get("origin"));
+        $token->setUserAgent($request->headers->get("user-agent"));
+        $token->setToken($random);
+        $token->setIsActive(true);
 
         $em = $this->getDoctrine()->getManager();
-        $em->persist($usuario);
+        $em->persist($token);
         $em->flush();
 
         $retorno["token"] = $random;
         $retorno["date"] = $date;
+        $retorno["username"] = $request->request->get("username");
 
         return JsonResponse::fromJsonString(
             $notify->newReturn(json_encode($retorno)),
             200, array('Symfony-Debug-Toolbar-Replace' => 1)
         );
+    }
+
+    /**
+     * @Route("/logoff", name="_app_logoff", methods={"POST"})
+     */
+    public function logout(Request $request){
+        $data = json_decode($request->getContent(), true);
+        $request->request->replace(is_array($data) ? $data : array());
+
+        $token = $this->getDoctrine()
+            ->getRepository(UserTokens::class)
+            ->findOneBy(array("token" => $request->request->get("token")));
+
+        /**
+         * @var $token UserTokens
+         */
+        $token->setIsActive(false);
+        $em = $this->getDoctrine()->getManager();
+        $em->persist($token);
+        $em->flush();
     }
 
     private function popula(UserPasswordEncoderInterface $encoder){

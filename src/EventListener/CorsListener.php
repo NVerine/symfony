@@ -12,6 +12,9 @@ use Symfony\Component\HttpKernel\KernelEvents;
 
 class CorsListener implements EventSubscriberInterface
 {
+    const ALLOWED_HEADERS = 'Origin, Content-Type, Token, Username';
+    const ALLOWED_METHODS = 'GET, POST, PATCH, PUT, DELETE, OPTIONS';
+
     public static function getSubscribedEvents(): array
     {
         return [
@@ -21,18 +24,16 @@ class CorsListener implements EventSubscriberInterface
 
     public function onKernelException(ExceptionEvent $event): void
     {
-        return;
         $response = $event->getResponse();
         if ($response) {
             $response->headers->set('Access-Control-Allow-Origin', '*');
-            $response->headers->set('Access-Control-Allow-Methods', 'GET, POST, PATCH, PUT, DELETE, OPTIONS');
-            $response->headers->set('Access-Control-Allow-Headers', 'Origin, Content-Type, Token');
+            $response->headers->set('Access-Control-Allow-Methods', self::ALLOWED_METHODS);
+            $response->headers->set('Access-Control-Allow-Headers', self::ALLOWED_HEADERS);
         }
     }
 
     public function onKernelRequest(RequestEvent $event): void
     {
-        return;
         // Don't do anything if it's not the master request.
         if (!$event->isMasterRequest()) {
             return;
@@ -49,7 +50,6 @@ class CorsListener implements EventSubscriberInterface
 
     public function onKernelResponse(ResponseEvent $event): void
     {
-        return;
         // Don't do anything if it's not the master request.
         if (!$event->isMasterRequest()) {
             return;
@@ -60,8 +60,8 @@ class CorsListener implements EventSubscriberInterface
                 new Response('', 204, [
                     'Access-Control-Allow-Origin' => '*',
                     'Access-Control-Allow-Credentials' => 'true',
-                    'Access-Control-Allow-Methods' => 'GET, POST, PUT, DELETE, OPTIONS',
-                    'Access-Control-Allow-Headers' => 'Origin, Content-Type, Token',
+                    'Access-Control-Allow-Methods' => self::ALLOWED_METHODS,
+                    'Access-Control-Allow-Headers' => self::ALLOWED_HEADERS,
                     'Access-Control-Max-Age' => 1728000,
                     'Content-Type' => 'text/plain charset=UTF-8',
                     'Content-Length' => 0
@@ -73,8 +73,8 @@ class CorsListener implements EventSubscriberInterface
         $response = $event->getResponse();
         if ($response) {
             $response->headers->set('Access-Control-Allow-Origin', '*');
-            $response->headers->set('Access-Control-Allow-Methods', 'GET, POST, PATCH, PUT, DELETE, OPTIONS');
-            $response->headers->set('Access-Control-Allow-Headers', 'Origin, Content-Type, Token');
+            $response->headers->set('Access-Control-Allow-Methods', self::ALLOWED_METHODS);
+            $response->headers->set('Access-Control-Allow-Headers', self::ALLOWED_HEADERS);
         }
     }
 }

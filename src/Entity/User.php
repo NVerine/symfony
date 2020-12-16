@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\UserInterface;
 
@@ -48,14 +50,14 @@ class User implements UserInterface
     private $pessoa;
 
      /**
-      * @ORM\Column(type="string", unique=true, nullable=true, length=255)
+      * @ORM\OneToMany(targetEntity=UserTokens::class, mappedBy="user", orphanRemoval=true)
       */
-     private $apiToken;
+     private $userTokens;
 
-     /**
-      * @ORM\Column(type="datetime", nullable=true)
-      */
-     private $loginDate;
+     public function __construct()
+     {
+         $this->userTokens = new ArrayCollection();
+     }
 
     /**
      * @return mixed
@@ -164,34 +166,33 @@ class User implements UserInterface
     }
 
     /**
-     * @return mixed
+     * @return Collection|UserTokens[]
      */
-    public function getApiToken()
+    public function getUserTokens(): Collection
     {
-        return $this->apiToken;
+        return $this->userTokens;
     }
 
-    /**
-     * @param mixed $apiToken
-     */
-    public function setApiToken($apiToken): void
+    public function addUserToken(UserTokens $userToken): self
     {
-        $this->apiToken = $apiToken;
+        if (!$this->userTokens->contains($userToken)) {
+            $this->userTokens[] = $userToken;
+            $userToken->setUser($this);
+        }
+
+        return $this;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getLoginDate()
+    public function removeUserToken(UserTokens $userToken): self
     {
-        return $this->loginDate;
-    }
+        if ($this->userTokens->contains($userToken)) {
+            $this->userTokens->removeElement($userToken);
+            // set the owning side to null (unless already changed)
+            if ($userToken->getUser() === $this) {
+                $userToken->setUser(null);
+            }
+        }
 
-    /**
-     * @param mixed $loginDate
-     */
-    public function setLoginDate($loginDate): void
-    {
-        $this->loginDate = $loginDate;
+        return $this;
     }
 }
