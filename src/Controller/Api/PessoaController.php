@@ -176,9 +176,9 @@ class PessoaController extends ControllerController
                     $endereco->setBairro($e["bairro"]);
                     $endereco->setComplemento($e["complemento"]);
                     $endereco->setNumero($e["numero"]);
-                    $endereco->setCep($e["cep"]);
+                    $endereco->setCep(preg_replace("/[^0-9\.]/", "", $e["cep"]));
                     $endereco->setIbgeCidade($e["ibgeCidade"]);
-                    $endereco->setIbgeEstado($e["ibgeEstado"]);
+//                    $endereco->setIbgeEstado($e["ibgeEstado"]);
                     $entityManager->persist($endereco);
                 }
             }

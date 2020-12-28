@@ -64,11 +64,6 @@ class PessoaEndereco
     /**
      * @ORM\Column(type="integer")
      */
-    private $ibge_estado;
-
-    /**
-     * @ORM\Column(type="integer")
-     */
     private $ibge_cidade;
 
     public function getId(): ?int
@@ -198,22 +193,6 @@ class PessoaEndereco
     public function setCep($cep): void
     {
         $this->cep = $cep;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getIbgeEstado()
-    {
-        return $this->ibge_estado;
-    }
-
-    /**
-     * @param mixed $ibge_estado
-     */
-    public function setIbgeEstado($ibge_estado): void
-    {
-        $this->ibge_estado = $ibge_estado;
     }
 
     /**
