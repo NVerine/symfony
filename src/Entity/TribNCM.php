@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\TribNCMRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * @ORM\Entity(repositoryClass=TribNCMRepository::class)
@@ -14,11 +15,13 @@ class TribNCM
      * @ORM\Id()
      * @ORM\GeneratedValue()
      * @ORM\Column(type="integer")
+     * @Groups({"default"})
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=300)
+     * @Groups({"default"})
      */
     private $nome;
 
@@ -29,11 +32,13 @@ class TribNCM
 
     /**
      * @ORM\Column(type="float", nullable=true)
+     * @Groups({"default"})
      */
     private $aliquota;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Groups({"default"})
      */
     private $descricao;
 
@@ -64,9 +69,14 @@ class TribNCM
         return $this;
     }
 
+    /**
+     * @Groups({"default"})
+     */
     public function getCodigo(): ?string
     {
-        return $this->codigo;
+        return substr($this->codigo, 0, 4). "." .
+            substr($this->codigo, 4, 2). "." .
+            substr($this->codigo, 6, 2);
     }
 
     public function setCodigo(?int $codigo): self
@@ -74,6 +84,11 @@ class TribNCM
         $this->codigo = $codigo;
 
         return $this;
+    }
+
+    public function getRawCodigo(): ?string
+    {
+        return $this->codigo;
     }
 
     public function getAliquota(): ?float

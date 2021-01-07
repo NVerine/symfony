@@ -1901,16 +1901,16 @@
         },
         {
             "name": "nfephp-org/sped-nfe",
-            "version": "v5.0.106",
+            "version": "v5.0.111",
             "source": {
                 "type": "git",
                 "url": "https://github.com/nfephp-org/sped-nfe.git",
-                "reference": "10e159adae970cf7e28c75f7d113bb7edd314078"
+                "reference": "6ebd7d8eb19550c92080faa7c041c65385c49b03"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/nfephp-org/sped-nfe/zipball/10e159adae970cf7e28c75f7d113bb7edd314078",
-                "reference": "10e159adae970cf7e28c75f7d113bb7edd314078",
+                "url": "https://api.github.com/repos/nfephp-org/sped-nfe/zipball/6ebd7d8eb19550c92080faa7c041c65385c49b03",
+                "reference": "6ebd7d8eb19550c92080faa7c041c65385c49b03",
                 "shasum": ""
             },
             "require": {
@@ -1970,7 +1970,11 @@
                 "nfephp",
                 "sped"
             ],
-            "time": "2020-06-08T19:54:33+00:00"
+            "support": {
+                "issues": "https://github.com/nfephp-org/sped-nfe/issues",
+                "source": "https://github.com/nfephp-org/sped-nfe/tree/v5.0.111"
+            },
+            "time": "2020-12-02T12:54:07+00:00"
         },
         {
             "name": "ocramius/package-versions",

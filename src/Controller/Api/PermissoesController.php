@@ -25,32 +25,36 @@ use Symfony\Component\Serializer\Serializer;
  */
 class PermissoesController extends ControllerController
 {
+    public function __construct(GrupoUsuariosRepository $repository, Notify $notify)
+    {
+        $this->entity = GrupoUsuarios::class;
+        $this->repository = $repository;
+        $this->notify = $notify;
+    }
+
     /**
      * @Route("/", name="api_permissoes_index", methods={"GET"})
      */
-    public function index(Request $request, GrupoUsuariosRepository $userRepository, Notify $notify): Response
+    public function index(Request $request): Response
     {
-        return JsonResponse::fromJsonString(
-            $notify->newReturn(parent::lista($userRepository, $request, array("id", "nome"))),
-            200, array('Symfony-Debug-Toolbar-Replace' => 1)
-        );
+        return $this->notifyReturn(parent::lista($request, [], ["id", "nome"], []));
     }
 
     /**
      * @Route("/lista", name="_permissoes_lista")
      */
-    public function listaPermissoes(Request $request, GrupoUsuariosRepository $userRepository, Notify $notify) :Response
+    public function listaPermissoes(Request $request) :Response
     {
-        return $this->index($request, $userRepository, $notify);
+        return $this->index($request);
     }
 
     /**
      * @Route("/current", name="_permissoes_current")
      */
-    public function getCurrent(SessionInterface $session, Notify $notify): Response
+    public function getCurrent(SessionInterface $session): Response
     {
         if($this->getUser()->getGrupo()->getId() == 1){
-            return $this->listaRotas($notify, true);
+            return $this->listaRotas(true);
         }
 
         $permissoes = $session->get("permissoes");
@@ -62,16 +66,13 @@ class PermissoesController extends ControllerController
             $retorno[$p->getRota()] = $p->getLiberado();
         }
 
-        return JsonResponse::fromJsonString(
-            $notify->newReturn(json_encode($retorno)),
-            200, array('Symfony-Debug-Toolbar-Replace' => 1, 'Access-Control-Allow-Origin' => '*')
-        );
+        return $this->notifyReturn(json_encode($retorno));
     }
 
     /**
      * @Route("/rotas", name="_permissoes_lista_rotas")
      */
-    public function listaRotas(Notify $notify, $value = null): Response
+    public function listaRotas($value = null): Response
     {
         $router = $this->get('router');
         $collection = $router->getRouteCollection();
@@ -86,27 +87,21 @@ class PermissoesController extends ControllerController
                 $routes[$route] = $value;//$params->getPath(); não preciso dos caminhos aqui
             }
         }
-        return JsonResponse::fromJsonString(
-            $notify->newReturn(json_encode($routes)),
-            200, array('Symfony-Debug-Toolbar-Replace' => 1)
-        );
+        return $this->notifyReturn(json_encode($routes));
     }
 
     /**
      * @Route("/{id}", name="api_permissoes_show", methods={"GET"})
      */
-    public function show($id, Notify $notify): Response
+    public function show($id): Response
     {
-        return JsonResponse::fromJsonString(
-            $notify->newReturn(parent::single($id, GrupoUsuarios::class, $notify)),
-            200, array('Symfony-Debug-Toolbar-Replace' => 1)
-        );
+        return $this->notifyReturn(parent::single($id));
     }
 
     /**
      * @Route("/{id}/edit", name="api_permissoes_edit", methods={"GET","POST"})
      */
-    public function edit($id, Request $request, Notify $notify): Response
+    public function edit($id, Request $request): Response
     {
         $data = json_decode($request->getContent(), true);
         $entityManager = $this->getDoctrine()->getManager();
@@ -146,10 +141,7 @@ class PermissoesController extends ControllerController
 
         $entityManager->flush();
 
-        $notify->addMessage($notify::TIPO_SUCCESS, "Grupo salvo com sucesso");
-        return JsonResponse::fromJsonString(
-            $notify->newReturn($grupo->getId()),
-            200, array('Symfony-Debug-Toolbar-Replace' => 1)
-        );
+        $this->notify->addMessage($this->notify::TIPO_SUCCESS, "Grupo salvo com sucesso");
+        return $this->notifyReturn($grupo->getId());
     }
 }

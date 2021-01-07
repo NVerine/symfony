@@ -22,33 +22,34 @@ use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
  */
 class UserController extends ControllerController
 {
+    public function __construct(UserRepository $repository, Notify $notify)
+    {
+        $this->entity = User::class;
+        $this->repository = $repository;
+        $this->notify = $notify;
+    }
+
     /**
      * @Route("/", name="api_user_index", methods={"GET"})
      */
-    public function index(Request $request, UserRepository $userRepository, Notify $notify): Response
+    public function index(Request $request): Response
     {
-        return JsonResponse::fromJsonString(
-            $notify->newReturn(parent::lista($userRepository, $request, array("id", "username", "nomeGrupo"))),
-            200, array('Symfony-Debug-Toolbar-Replace' => 1)
-        );
+        return $this->notifyReturn(parent::lista($request, [], ["id", "username", "nomeGrupo"], [], ['id', 'DESC']));
     }
 
     /**
      * @Route("/{id}", name="api_user_show", methods={"GET"})
      */
-    public function show($id, Notify $notify): Response
+    public function show($id): Response
     {
-        return JsonResponse::fromJsonString(
-            $notify->newReturn(parent::single($id, User::class, $notify)),
-            200, array('Symfony-Debug-Toolbar-Replace' => 1)
-        );
+        return $this->notifyReturn(parent::single($id));
     }
 
     /**
      * @Route("/{id}/edit", name="api_user_edit", methods={"GET","POST"})
      * @throws Exception
      */
-    public function edit($id, Request $request, UserPasswordEncoderInterface $passwordEncoder, Notify $notify): Response
+    public function edit($id, Request $request, UserPasswordEncoderInterface $passwordEncoder): Response
     {
         $data = json_decode($request->getContent(), true);
         $entityManager = $this->getDoctrine()->getManager();
@@ -69,7 +70,7 @@ class UserController extends ControllerController
         else{
             $user = new User();
 
-            if(!empty($data["nome"])){
+            if(empty($data["pessoa"])){
                 $pessoa = new Pessoa();
                 $pessoa->setCpfCnpj($data["cpf"]);
                 $pessoa->setTipo('F');
@@ -86,9 +87,10 @@ class UserController extends ControllerController
             }
         }
 
-        // apenas para testes substituir quando tiver o autocomplete
         if(empty($pessoa)){
-            $pessoa = $user->getPessoa();
+            $pessoa = $this->getDoctrine()
+                ->getRepository(Pessoa::class)
+                ->find($data["pessoa"]["id"]);
         }
 
         $user->setPessoa($pessoa);
@@ -118,10 +120,7 @@ class UserController extends ControllerController
         // actually executes the queries (i.e. the INSERT query)
         $entityManager->flush();
 
-        $notify->addMessage($notify::TIPO_SUCCESS, "Usuario salvo com sucesso");
-        return JsonResponse::fromJsonString(
-            $notify->newReturn($user->getId()),
-            200, array('Symfony-Debug-Toolbar-Replace' => 1)
-        );
+        $this->notify->addMessage($this->notify::TIPO_SUCCESS, "Usuario salvo com sucesso");
+        return $this->notifyReturn($user->getId());
     }
 }

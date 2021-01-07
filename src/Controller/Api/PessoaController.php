@@ -20,15 +20,18 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
  */
 class PessoaController extends ControllerController
 {
+    public function __construct(PessoaRepository $repository, Notify $notify)
+    {
+        $this->entity = Pessoa::class;
+        $this->repository = $repository;
+        $this->notify = $notify;
+    }
     /**
      * @Route("/", name="api_pessoa_index", methods={"GET"})
      */
-    public function index(Request $request, PessoaRepository $pessoaRepository, Notify $notify): Response
+    public function index(Request $request): Response
     {
-        return JsonResponse::fromJsonString(
-            $notify->newReturn(parent::lista($pessoaRepository, $request, [], array("endereco", "contato", "user"))),
-            200, array('Symfony-Debug-Toolbar-Replace' => 1)
-        );
+        return $this->notifyReturn(parent::lista($request, [], [], ["endereco", "contato", "user"], ['id', 'DESC']));
     }
 
     /**
@@ -71,18 +74,15 @@ class PessoaController extends ControllerController
      * @Route("/{id}", name="api_pessoa_show", methods={"GET"})
      * @throws Exception
      */
-    public function show($id, Notify $notify): Response
+    public function show($id): Response
     {
-        return JsonResponse::fromJsonString(
-            $notify->newReturn(parent::single($id, Pessoa::class, $notify)),
-            200, array('Symfony-Debug-Toolbar-Replace' => 1)
-        );
+        return $this->notifyReturn(parent::single($id));
     }
 
     /**
      * @Route("/{id}/edit", name="api_pessoa_edit", methods={"GET","POST"})
      */
-    public function edit($id, ValidatorInterface $validator, Request $request, Notify $notify): Response
+    public function edit($id, ValidatorInterface $validator, Request $request): Response
     {
         $conteudo = json_decode($request->getContent(), true);
 
@@ -92,10 +92,10 @@ class PessoaController extends ControllerController
             $pessoa = $this->getDoctrine()
                 ->getRepository(Pessoa::class)
                 ->find($id);
-            $notify->addMessage($notify::TIPO_INFO, "Atualizando cadastro de Pessoas");
+//            $notify->addMessage($notify::TIPO_INFO, "Atualizando cadastro de Pessoas");
         } else {
             $pessoa = new Pessoa();
-            $notify->addMessage($notify::TIPO_INFO, "Adicionando registro no cadastro de Pessoas");
+//            $notify->addMessage($notify::TIPO_INFO, "Adicionando registro no cadastro de Pessoas");
         }
 
         //binarios
@@ -132,16 +132,16 @@ class PessoaController extends ControllerController
                     $contato = $this->getDoctrine()
                         ->getRepository(PessoaContato::class)
                         ->find($c["id"]);
-                    $notify->addMessage($notify::TIPO_INFO, "Atualizando cadastro de contatos");
+//                    $notify->addMessage($notify::TIPO_INFO, "Atualizando cadastro de contatos");
                 } else {
                     $contato = new PessoaContato();
-                    $notify->addMessage($notify::TIPO_INFO, "Adicionando registro no cadastro de contatos");
+//                    $notify->addMessage($notify::TIPO_INFO, "Adicionando registro no cadastro de contatos");
                 }
 
                 if (isset($c["exclui"]) && $c["exclui"]) {
                     // Now if we remove it, it will set the deletedAt field to the actual date
                     $entityManager->remove($contato);
-                    $notify->addMessage($notify::TIPO_INFO, "Removendo registro do cadastro de contatos");
+                    $this->notify->addMessage($this->notify::TIPO_INFO, "Removendo registro do cadastro de contatos");
                 } else {
                     $contato->setPessoa($pessoa);
                     $contato->setNome($c["nome"]);
@@ -158,16 +158,16 @@ class PessoaController extends ControllerController
                     $endereco = $this->getDoctrine()
                         ->getRepository(PessoaEndereco::class)
                         ->find($e["id"]);
-                    $notify->addMessage($notify::TIPO_INFO, "Atualizando cadastro de endereços");
+//                    $notify->addMessage($notify::TIPO_INFO, "Atualizando cadastro de endereços");
                 } else {
                     $endereco = new PessoaEndereco();
-                    $notify->addMessage($notify::TIPO_INFO, "Adicionando registro no cadastro de endereços");
+//                    $notify->addMessage($notify::TIPO_INFO, "Adicionando registro no cadastro de endereços");
                 }
 
                 if (isset($e["exclui"]) && $e["exclui"]) {
                     // Now if we remove it, it will set the deletedAt field to the actual date
                     $entityManager->remove($endereco);
-                    $notify->addMessage($notify::TIPO_INFO, "Removendo registro do cadastro de endereços");
+                    $this->notify->addMessage($this->notify::TIPO_INFO, "Removendo registro do cadastro de endereços");
                 } else {
                     $endereco->setPessoa($pessoa);
                     $endereco->setUf($e["uf"]);
@@ -186,11 +186,7 @@ class PessoaController extends ControllerController
 
         // actually executes the queries (i.e. the INSERT query)
         $entityManager->flush();
-
-        $notify->addMessage($notify::TIPO_SUCCESS, "Pessoa salvo com sucesso");
-        return JsonResponse::fromJsonString(
-            $notify->newReturn($pessoa->getId()),
-            200, array('Symfony-Debug-Toolbar-Replace' => 1)
-        );
+        $this->notify->addMessage($this->notify::TIPO_SUCCESS, "Pessoa salvo com sucesso");
+        return $this->notifyReturn($pessoa->getId());
     }
 }

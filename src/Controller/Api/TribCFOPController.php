@@ -18,34 +18,34 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
  */
 class TribCFOPController extends ControllerController
 {
+    public function __construct(TribCFOPRepository $repository, Notify $notify)
+    {
+        $this->entity = TribCFOP::class;
+        $this->repository = $repository;
+        $this->notify = $notify;
+    }
+
     /**
      * @Route("/", name="api_trib_cfop_index", methods={"GET"})
      */
-    public function index(Request $request, TribCFOPRepository $CFOPRepository, Notify $notify): Response
+    public function index(Request $request): Response
     {
-        return JsonResponse::fromJsonString(
-            $notify->newReturn(parent::lista($CFOPRepository, $request, [], [], ['id', 'DESC'])),
-            200,
-            array('Symfony-Debug-Toolbar-Replace' => 1)
-        );
+        return $this->notifyReturn(parent::lista($request, [], [], [], ['id', 'DESC']));
     }
 
     /**
      * @Route("/{id}", name="api_trib_cfop_show", methods={"GET"})
      */
-    public function show($id, Notify $notify): Response
+    public function show($id): Response
     {
-        return JsonResponse::fromJsonString(
-            $notify->newReturn(parent::single($id, TribCFOP::class, $notify)),
-            200, array('Symfony-Debug-Toolbar-Replace' => 1)
-        );
+        return $this->notifyReturn(parent::single($id));
     }
 
     /**
      * @Route("/{id}/edit", name="api_trib_cfop_edit", methods={"POST"})
      * @throws \Exception
      */
-    public function edit($id, ValidatorInterface $validator, Request $request, Notify $notify): Response
+    public function edit($id, ValidatorInterface $validator, Request $request): Response
     {
         $conteudo = json_decode($request->getContent(), true);
 
@@ -75,10 +75,7 @@ class TribCFOPController extends ControllerController
         $entityManager->persist($item);
         $entityManager->flush();
 
-        $notify->addMessage($notify::TIPO_SUCCESS, "CFOP salvo com sucesso");
-        return JsonResponse::fromJsonString(
-            $notify->newReturn($item->getId()),
-            200, array('Symfony-Debug-Toolbar-Replace' => 1)
-        );
+        $this->notify->addMessage($this->notify::TIPO_SUCCESS, "CFOP salvo com sucesso");
+        return $this->notifyReturn($item->getId());
     }
 }

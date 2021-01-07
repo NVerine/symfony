@@ -3,6 +3,7 @@
 
 namespace App\Controller;
 
+use App\Entity\TribNCM;
 use App\Service\Notify;
 use ReflectionParameter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -13,19 +14,25 @@ use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Doctrine\Common\Annotations\AnnotationReader;
+use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactory;
+use Symfony\Component\Serializer\Mapping\Loader\AnnotationLoader;
 
 class ControllerController extends AbstractController
 {
+    protected $entity;
+    protected $repository;
+    protected $notify;
+
     /**
      * @param $id
      * @param $class
-     * @param Notify $notify
      * @param array $propriedades
      * @param array $ignorados
      * @return string
      */
     // renderizar dentro das páginas de edição
-    protected function single($id, $class, Notify $notify, array $propriedades = array(), array $ignorados = array())
+    protected function single($id, array $grupos = [], array $propriedades = [], array $ignorados = [])
     {
         // se for em branco retornar antes de consultar no db
         if ($id == 0) {
@@ -34,34 +41,32 @@ class ControllerController extends AbstractController
         $ignorados = array_merge(array("__initializer__", "__cloner__", "__isInitialized__"), $ignorados);
 
         $pessoa = $this->getDoctrine()
-            ->getRepository($class)
+            ->getRepository($this->entity)
             ->find($id);
 
         if (empty($pessoa)) {
-            $notify->addMessage($notify::TIPO_INFO, "Registro não encontrado");
+            $this->notify->addMessage($this->notify::TIPO_INFO, "Registro não encontrado");
             return "";
         }
 
-        return $this->serialize($pessoa, $propriedades, $ignorados);
+        return $this->serialize($pessoa, $grupos, $propriedades, $ignorados);
     }
 
     // renderizar dentro das páginas de pesquisa
 
     /**
-     * @param $repository
      * @param Request $request
      * @param array $propriedades
      * @param array $ignorados
      * @return string
      * não invocar em updates cascade
      */
-    protected function lista($repository, Request $request, array $propriedades = array(),
-                             array $ignorados = array(), array $order = array())
+    protected function lista(Request $request, array $grupos = [], array $propriedades = [], array $ignorados = [], array $order = [])
     {
         $ignorados = array_merge(array("__initializer__", "__cloner__", "__isInitialized__"), $ignorados);
         $conteudo = $request->query->all();
         $campos_que_usam_like = array("nome");
-        $result = $repository->createQueryBuilder('t');
+        $result = $this->repository->createQueryBuilder('t');
 
         foreach ($conteudo as $k => $v) {
             if (strpos($k, 'pesq_') !== false) {
@@ -92,7 +97,7 @@ class ControllerController extends AbstractController
             ->getQuery()
             ->getResult();
 
-        return $this->serialize($result, $propriedades, $ignorados);
+        return $this->serialize($result, $grupos, $propriedades, $ignorados);
     }
 
     /**
@@ -204,11 +209,13 @@ class ControllerController extends AbstractController
 
     /**
      * @param $obj
+     * @param array $grupos
      * @param array $propriedades
      * @param array $ignorados
      * @return string
+     * @throws \Symfony\Component\Serializer\Exception\ExceptionInterface
      */
-    private function serialize($obj, array $propriedades = array(), array $ignorados = array())
+    private function serialize($obj, array $grupos = [], array $propriedades = [], array $ignorados = [])
     {
         $encoder = new JsonEncoder();
         $defaultContext = [
@@ -218,16 +225,29 @@ class ControllerController extends AbstractController
             (empty($propriedades)) ?: AbstractNormalizer::ATTRIBUTES => $propriedades,
             (empty($ignorados)) ?: AbstractNormalizer::IGNORED_ATTRIBUTES => $ignorados
         ];
+        $classMetadataFactory = new ClassMetadataFactory(new AnnotationLoader(new AnnotationReader()));
         $normalizer = new ObjectNormalizer(
-            null, null, null,
+            $classMetadataFactory, null, null,
             null, null, null, $defaultContext
         );
 
         $serializer = new Serializer([$normalizer], [$encoder]);
 
-        return $serializer->serialize(
-            $obj,
-            'json'
+        // ['groups' => ['group1', 'group3']]
+        if(!empty($grupos)) $grupos = ['groups' => $grupos]; // corrige array
+
+        $obj = $serializer->normalize($obj, null, $grupos);
+        return $serializer->serialize($obj, 'json');
+    }
+
+    /**
+     * @param string $json
+     * @return JsonResponse
+     */
+    protected function notifyReturn(string $json)
+    {
+        return JsonResponse::fromJsonString(
+            $this->notify->newReturn($json), 200, array('Symfony-Debug-Toolbar-Replace' => 1)
         );
     }
 }
