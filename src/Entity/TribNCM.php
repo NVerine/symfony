@@ -47,11 +47,6 @@ class TribNCM
      */
     private $produto;
 
-    /**
-     * @ORM\ManyToOne(targetEntity=TribTipoOperacao::class, inversedBy="cst_trib")
-     */
-    private $tribTipoOperacaoTrib;
-
     public function getId(): ?int
     {
         return $this->id;
@@ -123,18 +118,6 @@ class TribNCM
     public function setProduto(?Produto $produto): self
     {
         $this->produto = $produto;
-
-        return $this;
-    }
-
-    public function getTribTipoOperacaoTrib(): ?TribTipoOperacao
-    {
-        return $this->tribTipoOperacaoTrib;
-    }
-
-    public function setTribTipoOperacaoTrib(?TribTipoOperacao $tribTipoOperacaoTrib): self
-    {
-        $this->tribTipoOperacaoTrib = $tribTipoOperacaoTrib;
 
         return $this;
     }

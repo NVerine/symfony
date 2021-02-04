@@ -2,11 +2,12 @@
     "type": "project",
     "license": "proprietary",
     "require": {
-        "php": "^7.2.5",
+        "php": "^7.4",
         "ext-ctype": "*",
         "ext-iconv": "*",
         "ext-json": "*",
         "gedmo/doctrine-extensions": "^2.4",
+        "microsoft/azure-storage-blob": "^1.5",
         "nfephp-org/sped-nfe": "^5.0",
         "symfony/apache-pack": "^1.0",
         "symfony/browser-kit": "5.1.*",

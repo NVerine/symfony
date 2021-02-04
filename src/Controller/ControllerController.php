@@ -3,13 +3,11 @@
 
 namespace App\Controller;
 
-use App\Entity\TribNCM;
-use App\Service\Notify;
-use ReflectionParameter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
+use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Serializer;
@@ -23,13 +21,17 @@ class ControllerController extends AbstractController
     protected $entity;
     protected $repository;
     protected $notify;
+    protected $em;
+    protected $createdEntity;
 
     /**
      * @param $id
-     * @param $class
+     * @param array $grupos
      * @param array $propriedades
      * @param array $ignorados
      * @return string
+     * @throws ExceptionInterface
+     * @deprecated
      */
     // renderizar dentro das páginas de edição
     protected function single($id, array $grupos = [], array $propriedades = [], array $ignorados = [])
@@ -56,10 +58,14 @@ class ControllerController extends AbstractController
 
     /**
      * @param Request $request
+     * @param array $grupos
      * @param array $propriedades
      * @param array $ignorados
+     * @param array $order
      * @return string
      * não invocar em updates cascade
+     * @throws ExceptionInterface
+     * @deprecated
      */
     protected function lista(Request $request, array $grupos = [], array $propriedades = [], array $ignorados = [], array $order = [])
     {
@@ -101,110 +107,50 @@ class ControllerController extends AbstractController
     }
 
     /**
-     * @param $id
-     * @param ValidatorInterface $validator
-     * @param Request $request
-     * @param $classe
-     * @return JsonResponse|\Symfony\Component\Validator\ConstraintViolationListInterface
-     * @throws \ReflectionException
+     * @param string|null $json
+     * @return JsonResponse
      */
-    protected function persiste($id, ValidatorInterface $validator, Request $request, $classe)
+    protected function notifyReturn(?string $json): JsonResponse
     {
-        $entityManager = $this->getDoctrine()->getManager();
-
-        if ($id > 0) {
-            $classe = $this->getDoctrine()
-                ->getRepository($classe)
-                ->find($id);
-        } else {
-            $classe = new $classe();
-        }
-
-        $conteudo = json_decode($request->getContent(), true);
-        $dependentes = array();
-
-        foreach ($conteudo as $k => $v) {
-            if (!$this->setpropriedades($classe, $k, $v)) {
-                return JsonResponse::fromJsonString('"Este metodo não deve ser implementado usando ControllerController"',
-                    200, array('Symfony-Debug-Toolbar-Replace' => 1)
-                );
-            }
-        }
-
-        $errors = $validator->validate($classe);
-        if (count($errors) > 0) {
-            return $errors;
-        }
-
-        // tell Doctrine you want to (eventually) save the Product (no queries yet)
-        $entityManager->persist($classe);
-
-        foreach ($dependentes as $k => $v) {
-            $get = "get" . ucfirst($k);
-            foreach ($classe->$get() as $t) {
-                dd($t);
-            }
-            $func = "add" . ucfirst($k);
-            $refParam = new ReflectionParameter(array($classe, $func), 0);
-            $export = ReflectionParameter::export(
-                array(
-                    $refParam->getDeclaringClass()->name,
-                    $refParam->getDeclaringFunction()->name
-                ),
-                $refParam->name,
-                true
-            );
-
-            $type = explode(' ', $export);
-            foreach ($v as $r) {
-                if (!empty($r["id"])) {
-                    $classe2 = $this->getDoctrine()
-                        ->getRepository($type[4])
-                        ->find($r["id"]);
-                } else {
-                    $classe2 = new $type[4]();
-                }
-
-//                foreach ($r as $kk => $vv){
-//                    $this->setpropriedades($classe2, $kk, $vv);
-//                }
-//                // tell Doctrine you want to (eventually) save the Product (no queries yet)
-//                $entityManager->persist($classe2);
-//                $classe->$func($classe2);
-            }
-        }
-
-        // actually executes the queries (i.e. the INSERT query)
-        $entityManager->flush();
-        return JsonResponse::fromJsonString('"funfou"',
-            200, array('Symfony-Debug-Toolbar-Replace' => 1)
+        return JsonResponse::fromJsonString(
+            $this->notify->newReturn($json), 200, array('Symfony-Debug-Toolbar-Replace' => 1)
         );
     }
 
     /**
-     * @param $classe
-     * @param $chave
-     * @param $valor
-     * @return bool
+     * @param $id
      */
-    private function setpropriedades(&$classe, $chave, $valor)
+    protected function getOrCreate($id)
     {
-        if ($chave == 'id') {
-            return true;
-        }
-        // toda data precisa chegar no formato dd-mm-yyyy
-        if (strpos($chave, 'data') !== false) {
-            $valor = \DateTime::createFromFormat('d-m-Y', $valor);
-        }
+        $this->em = $this->getDoctrine()->getManager();
 
-        $func = "set" . ucfirst($chave);
-        if (method_exists($classe, $func)) {
-            $classe->$func($valor);
+        if (!empty($id)) {
+            $this->createdEntity = $this->getDoctrine()
+                ->getRepository($this->entity)
+                ->find($id);
         } else {
-            return false;
+            $this->createdEntity = new $this->entity();
+        }
+    }
+
+    /**
+     * @param ValidatorInterface $validator
+     * @param string $entityName
+     * @return JsonResponse
+     * @throws \Exception
+     */
+    protected function insertOrUpdate(ValidatorInterface $validator, string $entityName) :JsonResponse
+    {
+        $errors = $validator->validate($this->createdEntity);
+        if (count($errors) > 0) {
+            throw new \Exception($errors);
         }
 
-        return true;
+        $this->em->persist($this->createdEntity);
+        $this->em->flush();
+
+        $this->notify->addMessage($this->notify::TIPO_SUCCESS, "{$entityName} salvo com sucesso");
+        return $this->notifyReturn($this->createdEntity->getId());
     }
 
     /**
@@ -213,9 +159,9 @@ class ControllerController extends AbstractController
      * @param array $propriedades
      * @param array $ignorados
      * @return string
-     * @throws \Symfony\Component\Serializer\Exception\ExceptionInterface
+     * @throws ExceptionInterface
      */
-    private function serialize($obj, array $grupos = [], array $propriedades = [], array $ignorados = [])
+    public function serialize($obj, array $grupos = [], array $propriedades = [], array $ignorados = []): string
     {
         $encoder = new JsonEncoder();
         $defaultContext = [
@@ -234,20 +180,9 @@ class ControllerController extends AbstractController
         $serializer = new Serializer([$normalizer], [$encoder]);
 
         // ['groups' => ['group1', 'group3']]
-        if(!empty($grupos)) $grupos = ['groups' => $grupos]; // corrige array
+        if (!empty($grupos)) $grupos = ['groups' => $grupos]; // corrige array
 
         $obj = $serializer->normalize($obj, null, $grupos);
         return $serializer->serialize($obj, 'json');
-    }
-
-    /**
-     * @param string $json
-     * @return JsonResponse
-     */
-    protected function notifyReturn(string $json)
-    {
-        return JsonResponse::fromJsonString(
-            $this->notify->newReturn($json), 200, array('Symfony-Debug-Toolbar-Replace' => 1)
-        );
     }
 }

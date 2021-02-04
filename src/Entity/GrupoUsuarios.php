@@ -60,7 +60,7 @@ class GrupoUsuarios
     /**
      * @return Collection|User[]
      */
-    public function getUsers(): Collection
+    public function getUsers(): ?Collection
     {
         return $this->users;
     }
@@ -91,7 +91,7 @@ class GrupoUsuarios
     /**
      * @return Collection|Permissoes[]
      */
-    public function getPermissoes(): Collection
+    public function getPermissoes(): ?Collection
     {
         return $this->permissoes;
     }

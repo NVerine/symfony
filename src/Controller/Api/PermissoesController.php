@@ -8,23 +8,24 @@ use App\Controller\ControllerController;
 use App\Entity\GrupoUsuarios;
 use App\Entity\Permissoes;
 use App\Repository\GrupoUsuariosRepository;
-use App\Repository\PermissoesRepository;
 use App\Service\Notify;
+use Doctrine\ORM\NonUniqueResultException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Serializer\Encoder\JsonEncoder;
-use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
-use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
-use Symfony\Component\Serializer\Serializer;
+use Symfony\Component\Serializer\Exception\ExceptionInterface;
 
 /**
  * @Route("/api/permissoes")
  */
 class PermissoesController extends ControllerController
 {
+    /**
+     * PermissoesController constructor.
+     * @param GrupoUsuariosRepository $repository
+     * @param Notify $notify
+     */
     public function __construct(GrupoUsuariosRepository $repository, Notify $notify)
     {
         $this->entity = GrupoUsuarios::class;
@@ -34,24 +35,38 @@ class PermissoesController extends ControllerController
 
     /**
      * @Route("/", name="api_permissoes_index", methods={"GET"})
+     * @param Request $request
+     * @return JsonResponse
+     * @throws ExceptionInterface
+     * @throws NonUniqueResultException
      */
-    public function index(Request $request): Response
+    public function index(Request $request): JsonResponse
     {
-        return $this->notifyReturn(parent::lista($request, [], ["id", "nome"], []));
+        return $this->notifyReturn(
+            parent::serialize(
+                ["items" => $this->repository->fetch($request)]
+            )
+        );
     }
 
     /**
      * @Route("/lista", name="_permissoes_lista")
+     * @param Request $request
+     * @return JsonResponse
+     * @throws ExceptionInterface
+     * @throws NonUniqueResultException
      */
-    public function listaPermissoes(Request $request) :Response
+    public function listaPermissoes(Request $request) :JsonResponse
     {
         return $this->index($request);
     }
 
     /**
      * @Route("/current", name="_permissoes_current")
+     * @param SessionInterface $session
+     * @return JsonResponse
      */
-    public function getCurrent(SessionInterface $session): Response
+    public function getCurrent(SessionInterface $session): JsonResponse
     {
         if($this->getUser()->getGrupo()->getId() == 1){
             return $this->listaRotas(true);
@@ -71,8 +86,10 @@ class PermissoesController extends ControllerController
 
     /**
      * @Route("/rotas", name="_permissoes_lista_rotas")
+     * @param null $value
+     * @return JsonResponse
      */
-    public function listaRotas($value = null): Response
+    public function listaRotas($value = null): JsonResponse
     {
         $router = $this->get('router');
         $collection = $router->getRouteCollection();
@@ -92,16 +109,24 @@ class PermissoesController extends ControllerController
 
     /**
      * @Route("/{id}", name="api_permissoes_show", methods={"GET"})
+     * @param $id
+     * @param Request $request
+     * @return JsonResponse
+     * @throws ExceptionInterface
+     * @throws NonUniqueResultException
      */
-    public function show($id): Response
+    public function show($id, Request $request): JsonResponse
     {
-        return $this->notifyReturn(parent::single($id));
+        return $this->notifyReturn(parent::serialize($this->repository->fetch($request, $id)));
     }
 
     /**
      * @Route("/{id}/edit", name="api_permissoes_edit", methods={"GET","POST"})
+     * @param $id
+     * @param Request $request
+     * @return JsonResponse
      */
-    public function edit($id, Request $request): Response
+    public function edit($id, Request $request): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
         $entityManager = $this->getDoctrine()->getManager();

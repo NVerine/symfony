@@ -74,7 +74,7 @@ class FamiliaProduto
     /**
      * @return Collection|Produto[]
      */
-    public function getProdutos(): Collection
+    public function getProdutos(): ?Collection
     {
         return $this->produtos;
     }

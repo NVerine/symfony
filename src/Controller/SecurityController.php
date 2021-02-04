@@ -107,12 +107,32 @@ class SecurityController extends AbstractController
             // tell Doctrine you want to (eventually) save the Product (no queries yet)
             $em->persist($grupo);
 
-            // cria uma pessoa antes
-            $pessoa = new Pessoa();
-            $pessoa->setNome("Administrador");
-            $pessoa->setTipo("F");
-            $pessoa->setNomeFantasia("Admin");
-            $pessoa->setCpfCnpj("000.000.000-00");
+
+            // mandar isso pra uma migration
+//            $pessoa = new Pessoa();
+//            $pessoa->setNome("Super Administrador");
+//            $pessoa->setTipo("F");
+////            $pessoa->set
+//            $pessoa->setNomeFantasia("Super Admin");
+//            $pessoa->setCpfCnpj("000.000.000-00");
+//            $pessoa->setAtivo(true);
+//
+//            // cria uma pessoa antes
+//            $pessoa = new Pessoa();
+//            $pessoa->setNome("Empresa padrão");
+//            $pessoa->setTipo("J");
+//            $pessoa->setNomeFantasia("Empresa padrão");
+//            $pessoa->setCpfCnpj("99.999.999/9999-99");
+//            $pessoa->setAtivo(true);
+//            $pessoa->setEmpresa(true);
+//
+//            // cria uma pessoa antes
+//            $pessoa = new Pessoa();
+//            $pessoa->setNome("Super Administrador");
+//            $pessoa->setTipo("F");
+//            $pessoa->setNomeFantasia("Super Admin");
+//            $pessoa->setCpfCnpj("000.000.000-00");
+//            $pessoa->setAtivo(true);
 
             $em->persist($pessoa);
             // TODO salvar pessoa endereço e pessoa contato aqui

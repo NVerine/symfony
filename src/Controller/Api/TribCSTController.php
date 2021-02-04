@@ -3,16 +3,15 @@
 namespace App\Controller\Api;
 
 use App\Controller\ControllerController;
-use App\Entity\TribCFOP;
 use App\Entity\TribCST;
-use App\Repository\TribCFOPRepository;
 use App\Repository\TribCSTRepository;
 use App\Service\Notify;
-use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\NonUniqueResultException;
+use Exception;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 /**
@@ -20,6 +19,11 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
  */
 class TribCSTController extends ControllerController
 {
+    /**
+     * TribCSTController constructor.
+     * @param TribCSTRepository $repository
+     * @param Notify $notify
+     */
     public function __construct(TribCSTRepository $repository, Notify $notify)
     {
         $this->entity = TribCST::class;
@@ -29,57 +33,79 @@ class TribCSTController extends ControllerController
 
     /**
      * @Route("/", name="api_trib_cst_index", methods={"GET"})
+     * @param Request $request
+     * @return JsonResponse
+     * @throws NonUniqueResultException
+     * @throws ExceptionInterface
      */
-    public function index(Request $request): Response
+    public function index(Request $request): JsonResponse
     {
-        return $this->notifyReturn(parent::lista($request, [], [], [], ['id', 'DESC']));
+        return $this->notifyReturn(
+            parent::serialize(
+                ["items" => $this->repository->fetch($request, null, ['tb.codigo' => 'asc'])]
+            )
+        );
+    }
+
+    /**
+     * @Route("/list", name="_api_trib_cst_list", methods={"GET"})
+     * @param Request $request
+     * @return JsonResponse
+     * @throws NonUniqueResultException
+     */
+    public function autocompleto(Request $request): JsonResponse
+    {
+        $cst = $this->repository->fetch($request);
+        $temp = array();
+        /**
+         * @var $p TribCST
+         */
+        foreach ($cst as $p){
+            $arr = array();
+            $arr["text"] = $p->getCodigo().") ".substr($p->getNome(), 0, 40);
+            $arr["value"] = $p->getId();
+            $arr["label"] = $p->getNome();
+            $temp[] = $arr;
+        }
+
+        return $this->notifyReturn(json_encode($temp));
     }
 
     /**
      * @Route("/{id}", name="api_trib_cst_show", methods={"GET"})
+     * @param Request $request
+     * @param $id
+     * @return JsonResponse
+     * @throws NonUniqueResultException
+     * @throws ExceptionInterface
      */
-    public function show($id): Response
+    public function show(Request $request, $id): JsonResponse
     {
-        return $this->notifyReturn(parent::single($id));
+        return $this->notifyReturn(parent::serialize($this->repository->fetch($request, $id)));
     }
 
     /**
      * @Route("/{id}/edit", name="api_trib_cst_edit", methods={"POST"})
-     * @throws \Exception
+     * @param $id
+     * @param ValidatorInterface $validator
+     * @param Request $request
+     * @return JsonResponse
+     * @throws Exception
      */
-    public function edit($id, ValidatorInterface $validator, Request $request): Response
+    public function edit($id, ValidatorInterface $validator, Request $request): JsonResponse
     {
         $conteudo = json_decode($request->getContent(), true);
+        $this->getOrCreate($id);
 
         /**
-         * @var $entityManager EntityManager
+         * @var $item TribCST
          */
-        $entityManager = $this->getDoctrine()->getManager();
-
-        if (!empty($id)) {
-            $item = $this->getDoctrine()
-                ->getRepository(TribCST::class)
-                ->find($id);
-            //$notify->addMessage($notify::TIPO_INFO, "Atualizando cadastro de Familia de produto");
-        }
-        else {
-            $item = new TribCST();
-            //$notify->addMessage($notify::TIPO_INFO, "Adicionando registro no cadastro de Familia de produto");
-        }
+        $item = $this->createdEntity;
         $item->setCodigo($conteudo["codigo"]);
-        $item->setDescricao($conteudo["descricao"]);
+        @$item->setDescricao($conteudo["descricao"]);
         $item->setNome($conteudo["nome"]);
         $item->setTipo($conteudo["tipo"]);
 
-        $errors = $validator->validate($item);
-        if (count($errors) > 0) {
-            throw new \Exception($errors);
-        }
-
-        $entityManager->persist($item);
-        $entityManager->flush();
-
-        $this->notify->addMessage($this->notify::TIPO_SUCCESS, "CST salvo com sucesso");
-        return $this->notifyReturn($item->getId());
+        return $this->insertOrUpdate($validator, "CST");
     }
 }

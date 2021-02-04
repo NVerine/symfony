@@ -41,10 +41,8 @@ class User implements UserInterface
      */
     private $grupo;
 
-    private $nomeGrupo;
-
     /**
-     * @ORM\OneToOne(targetEntity="App\Entity\Pessoa", inversedBy="user", cascade={"persist", "remove"})
+     * @ORM\ManyToOne(targetEntity="App\Entity\Pessoa", inversedBy="user")
      * @ORM\JoinColumn(nullable=false)
      */
     private $pessoa;

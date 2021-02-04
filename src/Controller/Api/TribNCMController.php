@@ -6,11 +6,12 @@ use App\Controller\ControllerController;
 use App\Entity\TribNCM;
 use App\Repository\TribNCMRepository;
 use App\Service\Notify;
-use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\NonUniqueResultException;
+use Exception;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 /**
@@ -18,6 +19,11 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
  */
 class TribNCMController extends ControllerController
 {
+    /**
+     * TribNCMController constructor.
+     * @param TribNCMRepository $repository
+     * @param Notify $notify
+     */
     public function __construct(TribNCMRepository $repository, Notify $notify)
     {
         $this->entity = TribNCM::class;
@@ -27,56 +33,53 @@ class TribNCMController extends ControllerController
 
     /**
      * @Route("/", name="api_trib_ncm_index", methods={"GET"})
+     * @param Request $request
+     * @return JsonResponse
+     * @throws NonUniqueResultException
+     * @throws ExceptionInterface
      */
-    public function index(Request $request): Response
+    public function index(Request $request): JsonResponse
     {
-        return $this->notifyReturn(parent::lista($request, ['default'], [], [], ['id', 'DESC']));
+        return $this->notifyReturn(
+            parent::serialize(["items" =>$this->repository->fetch($request, null, ["tb.id" => "desc"])])
+        );
     }
 
     /**
      * @Route("/{id}", name="api_trib_ncm_show", methods={"GET"})
+     * @param Request $request
+     * @param $id
+     * @return JsonResponse
+     * @throws NonUniqueResultException
+     * @throws ExceptionInterface
      */
-    public function show($id): Response
+    public function show(Request $request, $id): JsonResponse
     {
-        return $this->notifyReturn(parent::single($id, ['default']));
+        return $this->notifyReturn(parent::serialize($this->repository->fetch($request, $id)));
     }
 
     /**
      * @Route("/{id}/edit", name="api_trib_ncm_edit", methods={"POST"})
-     * @throws \Exception
+     * @param $id
+     * @param ValidatorInterface $validator
+     * @param Request $request
+     * @return JsonResponse
+     * @throws Exception
      */
-    public function edit($id, ValidatorInterface $validator, Request $request): Response
+    public function edit($id, ValidatorInterface $validator, Request $request): JsonResponse
     {
         $conteudo = json_decode($request->getContent(), true);
+        $this->getOrCreate($id);
 
         /**
-         * @var $entityManager EntityManager
+         * @var $item TribNCM
          */
-        $entityManager = $this->getDoctrine()->getManager();
-
-        if (!empty($id)) {
-            $item = $this->getDoctrine()
-                ->getRepository(TribNCM::class)
-                ->find($id);
-        }
-        else {
-            $item = new TribNCM();
-        }
-
+        $item = $this->createdEntity;
         $item->setCodigo(str_replace(".", "", $conteudo["codigo"]));
         $item->setDescricao($conteudo["descricao"]);
         $item->setNome($conteudo["nome"]);
         $item->setAliquota($conteudo["aliquota"]);
 
-        $errors = $validator->validate($item);
-        if (count($errors) > 0) {
-            throw new \Exception($errors);
-        }
-
-        $entityManager->persist($item);
-        $entityManager->flush();
-
-        $this->notify->addMessage($this->notify::TIPO_SUCCESS, "NCM salvo com sucesso");
-        return $this->notifyReturn($item->getId());
+        return $this->insertOrUpdate($validator, "NCM");
     }
 }

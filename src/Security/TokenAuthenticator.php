@@ -2,13 +2,14 @@
 
 namespace App\Security;
 
+use App\Entity\Filial;
 use App\Entity\User;
 use App\Entity\UserTokens;
 use Doctrine\ORM\EntityManagerInterface;
-use http\Env;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -18,10 +19,12 @@ use Symfony\Component\Security\Guard\AbstractGuardAuthenticator;
 class TokenAuthenticator extends AbstractGuardAuthenticator
 {
     private $em;
+    private $session;
 
-    public function __construct(EntityManagerInterface $em)
+    public function __construct(EntityManagerInterface $em, SessionInterface $session)
     {
         $this->em = $em;
+        $this->session = $session;
     }
 
     /**
@@ -47,6 +50,10 @@ class TokenAuthenticator extends AbstractGuardAuthenticator
 
     public function getUser($credentials, UserProviderInterface $userProvider)
     {
+        //todo trocar filial de acordo com a filial ativa no usuario
+        $filial = $this->em->getRepository(Filial::class)->loadLoggedFilial(1);
+        $this->session->set('filial', $filial);
+
         $request = $credentials;
         $bypass = $request->get("user");
         if($_ENV["ENVIRONMENT"] == 'dev' && !empty($bypass)){

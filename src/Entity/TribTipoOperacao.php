@@ -40,12 +40,12 @@ class TribTipoOperacao
     private $tipo;
 
     /**
-     * @ORM\OneToMany(targetEntity=TribCST::class, mappedBy="tribTipoOperacaoOrigem")
+     * @ORM\ManyToOne(targetEntity="App\Entity\TribCST", inversedBy="tribTipoOperacaoOrigem")
      */
     private $cst_origem;
 
     /**
-     * @ORM\OneToMany(targetEntity=TribNCM::class, mappedBy="tribTipoOperacaoTrib")
+     * @ORM\ManyToOne(targetEntity="App\Entity\TribCST", inversedBy="tribTipoOperacaoTrib")
      */
     private $cst_trib;
 
@@ -79,10 +79,19 @@ class TribTipoOperacao
      */
     private $issqnaliquota;
 
+    /**
+     * @ORM\OneToMany(targetEntity=ComercialItens::class, mappedBy="operacao")
+     */
+    private $comercialItens;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=TribCFOP::class, inversedBy="tribTipoOperacaos")
+     */
+    private $cfop;
+
     public function __construct()
     {
-        $this->cst_origem = new ArrayCollection();
-        $this->cst_trib = new ArrayCollection();
+        $this->comercialItens = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -138,67 +147,30 @@ class TribTipoOperacao
         return $this;
     }
 
-    /**
-     * @return Collection|TribCST[]
-     */
-    public function getCstOrigem(): Collection
+    public function getCstOrigem(): ?TribCST
     {
         return $this->cst_origem;
     }
 
-    public function addCstOrigem(TribCST $cstOrigem): self
+    public function setCstOrigem(?TribCST $cst_origem): self
     {
-        if (!$this->cst_origem->contains($cstOrigem)) {
-            $this->cst_origem[] = $cstOrigem;
-            $cstOrigem->setTribTipoOperacaoOrigem($this);
-        }
+        $this->cst_origem = $cst_origem;
 
         return $this;
     }
 
-    public function removeCstOrigem(TribCST $cstOrigem): self
-    {
-        if ($this->cst_origem->contains($cstOrigem)) {
-            $this->cst_origem->removeElement($cstOrigem);
-            // set the owning side to null (unless already changed)
-            if ($cstOrigem->getTribTipoOperacaoOrigem() === $this) {
-                $cstOrigem->setTribTipoOperacaoOrigem(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection|TribNCM[]
-     */
-    public function getCstTrib(): Collection
+    public function getCstTrib(): ?TribCST
     {
         return $this->cst_trib;
     }
 
-    public function addCstTrib(TribNCM $cstTrib): self
+    public function setCstTrib(?TribCST $cst_trib): self
     {
-        if (!$this->cst_trib->contains($cstTrib)) {
-            $this->cst_trib[] = $cstTrib;
-            $cstTrib->setTribTipoOperacaoTrib($this);
-        }
+        $this->cst_trib = $cst_trib;
 
         return $this;
     }
 
-    public function removeCstTrib(TribNCM $cstTrib): self
-    {
-        if ($this->cst_trib->contains($cstTrib)) {
-            $this->cst_trib->removeElement($cstTrib);
-            // set the owning side to null (unless already changed)
-            if ($cstTrib->getTribTipoOperacaoTrib() === $this) {
-                $cstTrib->setTribTipoOperacaoTrib(null);
-            }
-        }
-
-        return $this;
-    }
 
     public function getCsosn(): ?int
     {
@@ -268,6 +240,49 @@ class TribTipoOperacao
     public function setIssqnaliquota(float $issqnaliquota): self
     {
         $this->issqnaliquota = $issqnaliquota;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|ComercialItens[]
+     */
+    public function getComercialItens(): ?Collection
+    {
+        return $this->comercialItens;
+    }
+
+    public function addComercialIten(ComercialItens $comercialIten): self
+    {
+        if (!$this->comercialItens->contains($comercialIten)) {
+            $this->comercialItens[] = $comercialIten;
+            $comercialIten->setOperacao($this);
+        }
+
+        return $this;
+    }
+
+    public function removeComercialIten(ComercialItens $comercialIten): self
+    {
+        if ($this->comercialItens->contains($comercialIten)) {
+            $this->comercialItens->removeElement($comercialIten);
+            // set the owning side to null (unless already changed)
+            if ($comercialIten->getOperacao() === $this) {
+                $comercialIten->setOperacao(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getCfop(): ?TribCFOP
+    {
+        return $this->cfop;
+    }
+
+    public function setCfop(?TribCFOP $cfop): self
+    {
+        $this->cfop = $cfop;
 
         return $this;
     }

@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\TribCSTRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -36,6 +38,22 @@ class TribCST
      * @ORM\Column(type="string", length=10)
      */
     private $tipo;
+
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\TribTipoOperacao", mappedBy="cst_origem")
+     */
+    private $tribTipoOperacaoOrigem;
+
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\TribTipoOperacao", mappedBy="cst_trib")
+     */
+    private $tribTipoOperacaoTrib;
+
+    public function __construct()
+    {
+        $this->tribTipoOperacaoOrigem = new ArrayCollection();
+        $this->tribTipoOperacaoTrib = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -85,11 +103,73 @@ class TribCST
 
     public function setTipo(string $tipo): self
     {
-        if (!in_array($tipo, array('S', 'E'))) {    // saida, entrada
+        if (!in_array($tipo, array('O', 'T'))) {    // saida, entrada
             throw new \Exception("Tipo de CST incorreto");
         }
 
         $this->tipo = $tipo;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|TribTipoOperacao[]
+     */
+    public function getTribTipoOperacaoTrib(): ?Collection
+    {
+        return $this->tribTipoOperacaoTrib;
+    }
+
+    public function addTribTipoOperacaoTrib(TribTipoOperacao $tribTipoOperacaoTrib): self
+    {
+        if (!$this->tribTipoOperacaoTrib->contains($tribTipoOperacaoTrib)) {
+            $this->tribTipoOperacaoTrib[] = $tribTipoOperacaoTrib;
+            $tribTipoOperacaoTrib->setCstTrib($this);
+        }
+
+        return $this;
+    }
+
+    public function removeTribTipoOperacaoTrib(TribTipoOperacao $tribTipoOperacaoTrib): self
+    {
+        if ($this->tribTipoOperacaoTrib->contains($tribTipoOperacaoTrib)) {
+            $this->tribTipoOperacaoTrib->removeElement($tribTipoOperacaoTrib);
+            // set the owning side to null (unless already changed)
+            if ($tribTipoOperacaoTrib->getCstTrib() === $this) {
+                $tribTipoOperacaoTrib->setCstTrib(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|TribTipoOperacao[]
+     */
+    public function getTribTipoOperacaoOrigem(): ?Collection
+    {
+        return $this->tribTipoOperacaoOrigem;
+    }
+
+    public function addTribTipoOperacaoOrigem(TribTipoOperacao $tribTipoOperacaoOrigem): self
+    {
+        if (!$this->tribTipoOperacaoOrigem->contains($tribTipoOperacaoOrigem)) {
+            $this->tribTipoOperacaoOrigem[] = $tribTipoOperacaoOrigem;
+            $tribTipoOperacaoOrigem->setCstOrigem($this);
+        }
+
+        return $this;
+    }
+
+    public function removeTribTipoOperacaoOrigem(TribTipoOperacao $tribTipoOperacaoOrigem): self
+    {
+        if ($this->tribTipoOperacaoOrigem->contains($tribTipoOperacaoOrigem)) {
+            $this->tribTipoOperacaoOrigem->removeElement($tribTipoOperacaoOrigem);
+            // set the owning side to null (unless already changed)
+            if ($tribTipoOperacaoOrigem->getCstOrigem() === $this) {
+                $tribTipoOperacaoOrigem->setCstOrigem(null);
+            }
+        }
 
         return $this;
     }

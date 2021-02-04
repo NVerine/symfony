@@ -3,8 +3,11 @@
 
 namespace App\Controller\Api;
 
+use App\Entity\Filial;
+use App\Service\getDataFromApis;
 use NFePHP\NFe\Make;
 use stdClass;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -12,11 +15,22 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class NFEController
 {
+    private $session;
+
+    public function __construct(SessionInterface $session)
+    {
+        $this->session = $session;
+    }
+
     /**
      * @Route("/", name="api_produto_nfe")
      */
     public function nfe()
     {
+        /**
+         * @var $filial Filial
+         */
+        $filial = $this->session->get("filial");
         $nfe = new Make();
 
         $config = new stdClass();
@@ -26,10 +40,9 @@ class NFEController
         $nfe->taginfNFe($config);
 
         $identificacao = new stdClass();
-        $identificacao->cUF = 35;
-        $identificacao->cNF = '80070008';
+        $identificacao->cUF = getDataFromApis::getCodEstado($filial->getPessoa()->getEnderecoPrincipal()->getUf());
+        $identificacao->cNF = '80070008'; // obter de acordo com a id do tb nota
         $identificacao->natOp = 'VENDA';
-        $identificacao->indPag = 0; //NÃO EXISTE MAIS NA VERSÃO 4.00
         $identificacao->mod = 55;
         $identificacao->serie = 1;
         $identificacao->nNF = 2;
@@ -37,47 +50,52 @@ class NFEController
         $identificacao->dhSaiEnt = null;
         $identificacao->tpNF = 1;
         $identificacao->idDest = 1;
-        $identificacao->cMunFG = 3518800;
-        $identificacao->tpImp = 1;
+        $identificacao->cMunFG = $filial->getPessoa()->getEnderecoPrincipal()->getIbgeCidade();
+        $identificacao->tpImp = 1;  //1-Retrato/ 2-Paisagem
         $identificacao->tpEmis = 1;
         $identificacao->cDV = 2;
-        $identificacao->tpAmb = 2;
+        $identificacao->tpAmb = 2; //1-Produção/ 2-Homologação
         $identificacao->finNFe = 1;
         $identificacao->indFinal = 0;
         $identificacao->indPres = 0;
         $identificacao->procEmi = 0;
-        $identificacao->verProc = '3.10.31';
+        $identificacao->verProc = '1.0'; // versão do nverine
         $identificacao->dhCont = null;
         $identificacao->xJust = null;
         $nfe->tagide($identificacao);
 
-        dd($nfe);
-
         $emitente = new stdClass();
-        $emitente->xNome;
-        $emitente->xFant;
-        $emitente->IE;
-        $emitente->IEST;
-        $emitente->IM;
-        $emitente->CNAE;
-        $emitente->CRT;
-        $emitente->CNPJ; //indicar apenas um CNPJ ou CPF
-        $emitente->CPF;
+        $emitente->xNome = $filial->getPessoa()->getNome();
+        $emitente->xFant = $filial->getPessoa()->getNomeFantasia();
+        $emitente->IE = $filial->getPessoa()->getRg(); // ie
+//        $emitente->IEST;
+//        $emitente->IM;
+//        $emitente->CNAE;
+        $emitente->CRT = $filial->getRegimeTributario();
+        if($filial->getPessoa()->getTipo() == 'F'){
+            $emitente->CPF = $filial->getPessoa()->getCpfCnpj(); //indicar apenas um CNPJ ou CPF
+        }
+        else{
+            $emitente->CNPJ = $filial->getPessoa()->getCpfCnpj(); //indicar apenas um CNPJ ou CPF
+        }
+
         $nfe->tagemit($emitente);
 
         $emitente_endereco = new stdClass();
-        $emitente_endereco->xLgr;
-        $emitente_endereco->nro;
-        $emitente_endereco->xCpl;
-        $emitente_endereco->xBairro;
-        $emitente_endereco->cMun;
-        $emitente_endereco->xMun;
-        $emitente_endereco->UF;
-        $emitente_endereco->CEP;
-        $emitente_endereco->cPais;
-        $emitente_endereco->xPais;
-        $emitente_endereco->fone;
+        $emitente_endereco->xLgr = $filial->getPessoa()->getEnderecoPrincipal()->getLogradouro();
+        $emitente_endereco->nro = $filial->getPessoa()->getEnderecoPrincipal()->getNumero();
+        $emitente_endereco->xCpl = $filial->getPessoa()->getEnderecoPrincipal()->getComplemento();
+        $emitente_endereco->xBairro = $filial->getPessoa()->getEnderecoPrincipal()->getBairro();
+        $emitente_endereco->cMun = $filial->getPessoa()->getEnderecoPrincipal()->getIbgeCidade();
+        $emitente_endereco->xMun = $filial->getPessoa()->getEnderecoPrincipal()->getCidade();
+        $emitente_endereco->UF = $filial->getPessoa()->getEnderecoPrincipal()->getUf();
+        $emitente_endereco->CEP = $filial->getPessoa()->getEnderecoPrincipal()->getCep();
+//        $emitente_endereco->cPais;
+//        $emitente_endereco->xPais;
+        $emitente_endereco->fone = $filial->getPessoa()->getContatoPrincipal()->getTelefone();
         $nfe->tagenderEmit($emitente_endereco);
+
+        dd($nfe);
 
         $destinatario = new stdClass();
         $destinatario->xNome;

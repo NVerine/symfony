@@ -2,46 +2,45 @@
 
 namespace App\Repository;
 
-use App\Entity\FamiliaProduto;
+use App\Entity\Comercial;
 use App\Service\SQLHelper;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\Query;
+use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
- * @method FamiliaProduto|null find($id, $lockMode = null, $lockVersion = null)
- * @method FamiliaProduto|null findOneBy(array $criteria, array $orderBy = null)
- * @method FamiliaProduto[]    findAll()
- * @method FamiliaProduto[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method Comercial|null find($id, $lockMode = null, $lockVersion = null)
+ * @method Comercial|null findOneBy(array $criteria, array $orderBy = null)
+ * @method Comercial[]    findAll()
+ * @method Comercial[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class FamiliaProdutoRepository extends ServiceEntityRepository
+class ComercialRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, FamiliaProduto::class);
+        parent::__construct($registry, Comercial::class);
     }
 
     /**
      * @param Request|null $request
      * @param null $id
-     * @param array $order ["coluna" => "asc"]
      * @return int|mixed|string
-     * @throws NonUniqueResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
      */
-    public function fetch(Request $request, $id = null, array $order = [])
+    public function fetch(Request $request = null, $id = null)
     {
-        if ($id == '0'){
-            return null;
-        }
-        $qb = $this->createQueryBuilder('tb')
-            ->select('tb')
+        $qb = $this->createQueryBuilder('comercial')
+            ->select('pessoa', 'comercial', 'item', 'produto')
+            ->innerJoin('comercial.cliente', 'pessoa')
+            ->innerJoin('comercial.comercialItens', 'item')
+            ->innerJoin('item.produto', 'produto')
         ;
 
         if($id > 0) {
             return $qb
-                ->andWhere('tb.id = :val')
+                ->andWhere('comercial.id = :val')
                 ->setParameter('val', $id)
                 ->getQuery()
                 ->setHint(Query::HINT_FORCE_PARTIAL_LOAD, true)
@@ -49,10 +48,6 @@ class FamiliaProdutoRepository extends ServiceEntityRepository
         }
 
         $this->createWhere($request, $qb);
-
-        foreach ($order as $k=>$r){
-            $qb = $qb->addOrderBy($k, $r);
-        }
 
         return SQLHelper::setPagination($request, $qb)
             ->getQuery()

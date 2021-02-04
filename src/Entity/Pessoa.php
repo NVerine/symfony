@@ -2,9 +2,11 @@
 
 namespace App\Entity;
 
+use App\Util\ValueHelper;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\PessoaRepository")
@@ -14,94 +16,134 @@ class Pessoa
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()
+     * @Groups ({"pessoa_default"})
      * @ORM\Column(type="integer")
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Groups ({"pessoa_default"})
      */
     private $tipo;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Groups ({"pessoa_default"})
      */
     private $nome;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Groups ({"pessoa_default"})
      */
     private $nome_fantasia;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Groups ({"pessoa_default"})
      */
     private $cpf_cnpj;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
+     * @Groups ({"pessoa_default"})
      */
     private $rg;
 
     /**
      * @ORM\Column(type="integer", nullable=true)
+     * @Groups ({"pessoa_default"})
      */
     private $cnae;
 
     /**
      * @ORM\Column(type="text", nullable=true)
+     * @Groups ({"pessoa_default"})
      */
     private $observacoes;
 
     /**
      * @ORM\Column(type="date", nullable=true)
+     * @Groups ({"pessoa_default"})
      */
     private $data_nascimento;
 
     /**
      * @ORM\Column(type="boolean")
+     * @Groups ({"pessoa_default"})
      */
     private $ativo = true;
 
     /**
      * @ORM\Column(type="boolean")
+     * @Groups ({"pessoa_default"})
      */
     private $cliente = false;
 
     /**
      * @ORM\Column(type="boolean")
+     * @Groups ({"pessoa_default"})
      */
     private $fornecedor = false;
 
     /**
      * @ORM\Column(type="boolean")
+     * @Groups ({"pessoa_default"})
      */
     private $funcionario = false;
 
     /**
      * @ORM\Column(type="boolean")
+     * @Groups ({"pessoa_default"})
      */
     private $empresa = false;
 
     /**
      * @ORM\OneToMany(targetEntity="App\Entity\PessoaEndereco", mappedBy="pessoa")
+     * @Groups ({"pessoa_default"})
      */
     private $endereco;
 
     /**
      * @ORM\OneToMany(targetEntity="App\Entity\PessoaContato", mappedBy="pessoa")
+     * @Groups ({"pessoa_default"})
      */
     private $contato;
 
     /**
-     * @ORM\OneToOne(targetEntity="App\Entity\User", mappedBy="pessoa", cascade={"persist", "remove"})
+     * @ORM\OneToMany(targetEntity="App\Entity\User", mappedBy="pessoa")
      */
     private $user;
+
+    /**
+     * @ORM\OneToOne(targetEntity="App\Entity\Filial", mappedBy="pessoa")
+     */
+    private $filial;
+
+    /**
+     * @ORM\OneToOne(targetEntity=PessoaEndereco::class, cascade={"persist", "remove"})
+     * @Groups ({"pessoa_default"})
+     */
+    private $enderecoPrincipal;
+
+    /**
+     * @ORM\OneToOne(targetEntity=PessoaContato::class, cascade={"persist", "remove"})
+     * @Groups ({"pessoa_default"})
+     */
+    private $contatoPrincipal;
+
+    /**
+     * @ORM\OneToMany(targetEntity=Comercial::class, mappedBy="cliente")
+     */
+    private $comercials;
 
     public function __construct()
     {
         $this->endereco = new ArrayCollection();
         $this->contato = new ArrayCollection();
+        $this->comercials = new ArrayCollection();
+        $this->user = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -119,6 +161,15 @@ class Pessoa
         $this->tipo = $tipo;
 
         return $this;
+    }
+
+    /**
+     * @Groups ({"pessoa_index"})
+     */
+    public function getFullTipo(): string
+    {
+        if($this->tipo == "j") return "Jurídica";
+        return "Física";
     }
 
     public function getNome(): ?string
@@ -269,9 +320,43 @@ class Pessoa
     /**
      * @return Collection|PessoaEndereco[]
      */
-    public function getEndereco(): Collection
+    public function getEndereco(): ?Collection
     {
         return $this->endereco;
+    }
+
+    /**
+     * @return string
+     * @Groups({"pessoa_index"})
+     */
+    public function getEnderecoCompleto(): ?string
+    {
+        $endereco = $this->enderecoPrincipal;
+        if(empty($endereco)) return null;
+        $endereco_completo = "";
+        /**
+         * @var $endereco PessoaEndereco
+         */
+
+        if($endereco->getLogradouro()){
+            $endereco_completo = $endereco->getLogradouro();
+        }
+        if($endereco->getNumero()){
+            $endereco_completo .= " ".$endereco->getNumero();
+        }
+        if($endereco->getBairro()){
+            $endereco_completo .= " - ".$endereco->getBairro();
+        }
+        if($endereco->getCidade()){
+            $endereco_completo .= ", ".$endereco->getCidade();
+        }
+        if($endereco->getUf()){
+            $endereco_completo .= "/".$endereco->getUf();
+        }
+        if($endereco->getCep()){
+            $endereco_completo .= " ". ValueHelper::maskCep($endereco->getCep());
+        }
+        return $endereco_completo;
     }
 
     public function addEndereco(PessoaEndereco $endereco): self
@@ -300,7 +385,7 @@ class Pessoa
     /**
      * @return Collection|PessoaContato[]
      */
-    public function getContato(): Collection
+    public function getContato(): ?Collection
     {
         return $this->contato;
     }
@@ -328,18 +413,127 @@ class Pessoa
         return $this;
     }
 
-    public function getUser(): ?User
+
+    /**
+     * @return string
+     * @Groups({"pessoa_index"})
+     */
+    public function getContatoCompleto(): ?string
+    {
+        /**
+         * @var $contato PessoaContato
+         */
+        $contato = $this->contatoPrincipal;
+        if(empty($contato)) return null;
+
+        $contato_completo = "";
+        if($contato->getNome()){
+            $contato_completo = $contato->getNome();
+        }
+        if($contato->getTelefone()){
+            $contato_completo .= " ".$contato->getTelefone();
+        }
+        if($contato->getEmail()){
+            $contato_completo .= " - ".$contato->getEmail();
+        }
+        return $contato_completo;
+    }
+
+    public function getUser(): ?Collection
     {
         return $this->user;
     }
 
-    public function setUser(User $user): self
+    public function addUser(User $user): self
     {
-        $this->user = $user;
+        if (!$this->user->contains($user)) {
+            $this->user[] = $user;
+            $user->setPessoa($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUser(User $user): self
+    {
+        if ($this->user->contains($user)) {
+            $this->user->removeElement($user);
+            // set the owning side to null (unless already changed)
+            if ($user->getPessoa() === $this) {
+                $user->setPessoa(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getFilial(): ?Filial
+    {
+        return $this->filial;
+    }
+
+    public function setFilial(Filial $filial): self
+    {
+        $this->filial = $filial;
 
         // set the owning side of the relation if necessary
-        if ($user->getPessoa() !== $this) {
-            $user->setPessoa($this);
+        if ($filial->getPessoa() !== $this) {
+            $filial->setPessoa($this);
+        }
+
+        return $this;
+    }
+
+    public function getEnderecoPrincipal(): ?PessoaEndereco
+    {
+        return $this->enderecoPrincipal;
+    }
+
+    public function setEnderecoPrincipal(?PessoaEndereco $enderecoPrincipal): self
+    {
+        $this->enderecoPrincipal = $enderecoPrincipal;
+
+        return $this;
+    }
+
+    public function getContatoPrincipal(): ?PessoaContato
+    {
+        return $this->contatoPrincipal;
+    }
+
+    public function setContatoPrincipal(?PessoaContato $contatoPrincipal): self
+    {
+        $this->contatoPrincipal = $contatoPrincipal;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Comercial[]
+     */
+    public function getComercials(): ?Collection
+    {
+        return $this->comercials;
+    }
+
+    public function addComercial(Comercial $comercial): self
+    {
+        if (!$this->comercials->contains($comercial)) {
+            $this->comercials[] = $comercial;
+            $comercial->setCliente($this);
+        }
+
+        return $this;
+    }
+
+    public function removeComercial(Comercial $comercial): self
+    {
+        if ($this->comercials->contains($comercial)) {
+            $this->comercials->removeElement($comercial);
+            // set the owning side to null (unless already changed)
+            if ($comercial->getCliente() === $this) {
+                $comercial->setCliente(null);
+            }
         }
 
         return $this;

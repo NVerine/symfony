@@ -6,6 +6,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 use Gedmo\SoftDeleteable\Traits\SoftDeleteableEntity;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\PessoaContatoRepository")
@@ -18,6 +19,7 @@ class PessoaContato
      * @ORM\Id()
      * @ORM\GeneratedValue()
      * @ORM\Column(type="integer")
+     * @Groups ({"pessoacontato_default"})
      */
     private $id;
 
@@ -29,16 +31,19 @@ class PessoaContato
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Groups ({"pessoacontato_default"})
      */
     private $nome;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Groups ({"pessoacontato_default"})
      */
     private $telefone;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Groups ({"pessoacontato_default"})
      */
     private $email;
 

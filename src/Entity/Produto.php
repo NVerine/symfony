@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Util\ValueHelper;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -24,7 +25,7 @@ class Produto
     private $nome;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(type="float")
      */
     private $preco;
 
@@ -44,9 +45,15 @@ class Produto
      */
     private $ncm;
 
+    /**
+     * @ORM\OneToMany(targetEntity=ComercialItens::class, mappedBy="produto")
+     */
+    private $comercialItens;
+
     public function __construct()
     {
         $this->ncm = new ArrayCollection();
+        $this->comercialItens = new ArrayCollection();
     }
 
 
@@ -67,12 +74,12 @@ class Produto
         return $this;
     }
 
-    public function getPreco(): ?int
+    public function getPreco(): ?string
     {
-        return $this->preco;
+        return ValueHelper::intToMoney($this->preco);
     }
 
-    public function setPreco(int $preco): self
+    public function setPreco(float $preco): self
     {
         $this->preco = $preco;
 
@@ -106,7 +113,7 @@ class Produto
     /**
      * @return Collection|TribNCM[]
      */
-    public function getNcm(): Collection
+    public function getNcm(): ?Collection
     {
         return $this->ncm;
     }
@@ -128,6 +135,37 @@ class Produto
             // set the owning side to null (unless already changed)
             if ($ncm->getProduto() === $this) {
                 $ncm->setProduto(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|ComercialItens[]
+     */
+    public function getComercialItens(): ?Collection
+    {
+        return $this->comercialItens;
+    }
+
+    public function addComercialIten(ComercialItens $comercialIten): self
+    {
+        if (!$this->comercialItens->contains($comercialIten)) {
+            $this->comercialItens[] = $comercialIten;
+            $comercialIten->setProduto($this);
+        }
+
+        return $this;
+    }
+
+    public function removeComercialIten(ComercialItens $comercialIten): self
+    {
+        if ($this->comercialItens->contains($comercialIten)) {
+            $this->comercialItens->removeElement($comercialIten);
+            // set the owning side to null (unless already changed)
+            if ($comercialIten->getProduto() === $this) {
+                $comercialIten->setProduto(null);
             }
         }
 

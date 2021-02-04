@@ -8,11 +8,13 @@ use App\Entity\PessoaContato;
 use App\Entity\PessoaEndereco;
 use App\Repository\PessoaRepository;
 use App\Service\Notify;
+use App\Util\ValueHelper;
+use Doctrine\ORM\NonUniqueResultException;
 use Exception;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 /**
@@ -20,31 +22,71 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
  */
 class PessoaController extends ControllerController
 {
+    /**
+     * atentar para ordenação
+     * @var array
+     */
+    public static array $headers = [
+        "id",
+        "nome",
+        ["fullTipo" => "tipo"],
+        "nome_fantasia",
+        "cpf_cnpj",
+        "rg",
+        "cnae",
+        "data_nascimento",
+        "ativo",
+        "cliente",
+        "fornecedor",
+        "funcionario",
+        "empresa",
+        ["enderecoCompleto" => "Endereço"],
+        ["contatoCompleto" => "contato"]
+    ];
+
+    /**
+     * PessoaController constructor.
+     * @param PessoaRepository $repository
+     * @param Notify $notify
+     */
     public function __construct(PessoaRepository $repository, Notify $notify)
     {
         $this->entity = Pessoa::class;
         $this->repository = $repository;
         $this->notify = $notify;
     }
+
     /**
      * @Route("/", name="api_pessoa_index", methods={"GET"})
+     * @param Request $request
+     * @return JsonResponse
+     * @throws ExceptionInterface
+     * @throws NonUniqueResultException
      */
-    public function index(Request $request): Response
+    public function index(Request $request): JsonResponse
     {
-        return $this->notifyReturn(parent::lista($request, [], [], ["endereco", "contato", "user"], ['id', 'DESC']));
+        return $this->notifyReturn(
+            parent::serialize(
+                ["headers" => self::$headers, "items" => $this->repository->fetch($request)],
+                ["pessoa_default", "pessoaendereco_default", "pessoacontato_default", "pessoa_index"]
+            )
+        );
     }
 
     /**
      * @Route("/autocomplete/nome", name="_api_pessoa_autocomplete_nome", methods={"GET"})
+     * @param Request $request
+     * @return JsonResponse
      */
-    public function autocompleto(Request $request){
+    public function autocompleto(Request $request): JsonResponse
+    {
         $conteudo = $request->query->all();
 
         $pessoa = $this->getDoctrine()
             ->getRepository(Pessoa::class)
             ->createQueryBuilder('a')
             ->where('a.nome LIKE :nome')
-            ->setParameter('nome', $conteudo["pesq_nome"]."%")
+            ->setParameter('nome', $conteudo["pesq_nome"] . "%")
             ->setFirstResult(0)
             ->setMaxResults(10)
             ->getQuery()
@@ -54,9 +96,9 @@ class PessoaController extends ControllerController
         /**
          * @var $p Pessoa
          */
-        foreach ($pessoa as $p){
+        foreach ($pessoa as $p) {
             $arr = array();
-            $arr["text"] = $p->getId()." | ".$p->getCpfCnpj()." | ".substr($p->getNome(), 0, 30);
+            $arr["text"] = $p->getId() . " | " . $p->getCpfCnpj() . " | " . substr($p->getNome(), 0, 30);
             $arr["value"] = $p->getId();
             $arr["label"] = $p->getNome();
             $temp[] = $arr;
@@ -72,17 +114,26 @@ class PessoaController extends ControllerController
 
     /**
      * @Route("/{id}", name="api_pessoa_show", methods={"GET"})
-     * @throws Exception
+     * @param $id
+     * @param Request $request
+     * @return JsonResponse
+     * @throws NonUniqueResultException
+     * @throws ExceptionInterface
      */
-    public function show($id): Response
+    public function show($id, Request $request): JsonResponse
     {
-        return $this->notifyReturn(parent::single($id));
+        return $this->notifyReturn(parent::serialize($this->repository->fetch($request, $id), [], [], ['user', 'filial', 'comercials']));
     }
 
     /**
      * @Route("/{id}/edit", name="api_pessoa_edit", methods={"GET","POST"})
+     * @param $id
+     * @param ValidatorInterface $validator
+     * @param Request $request
+     * @return JsonResponse
+     * @throws Exception
      */
-    public function edit($id, ValidatorInterface $validator, Request $request): Response
+    public function edit($id, ValidatorInterface $validator, Request $request): JsonResponse
     {
         $conteudo = json_decode($request->getContent(), true);
 
@@ -99,17 +150,17 @@ class PessoaController extends ControllerController
         }
 
         //binarios
-        @$pessoa->setAtivo($conteudo["ativo"] || true);
-        @$pessoa->setCliente($conteudo["cliente"] || true);
-        @$pessoa->setEmpresa($conteudo["empresa"] || true);
-        @$pessoa->setFornecedor($conteudo["fornecedor"] || true);
-        @$pessoa->setFuncionario($conteudo["funcionario"] || true);
+        @$pessoa->setAtivo(ValueHelper::toBinary($conteudo["ativo"]));
+        @$pessoa->setCliente(ValueHelper::toBinary($conteudo["cliente"]));
+        @$pessoa->setEmpresa(ValueHelper::toBinary($conteudo["empresa"]));
+        @$pessoa->setFornecedor(ValueHelper::toBinary($conteudo["fornecedor"]));
+        @$pessoa->setFuncionario(ValueHelper::toBinary($conteudo["funcionario"]));
 
         //demais
         $pessoa->setNome($conteudo["nome"]);
         $pessoa->setTipo($conteudo["tipo"]);
         $pessoa->setCpfCnpj($conteudo["cpfCnpj"]);
-        if(!empty($conteudo["dataNascimento"])) {
+        if (!empty($conteudo["dataNascimento"])) {
             $data = \DateTime::createFromFormat('d-m-Y', $conteudo["dataNascimento"]);
             $pessoa->setDataNascimento($data);
         }
@@ -126,8 +177,8 @@ class PessoaController extends ControllerController
         // tell Doctrine you want to (eventually) save the Product (no queries yet)
         $entityManager->persist($pessoa);
 
-        if(!empty($conteudo["contato"])) {
-            foreach ($conteudo["contato"] as $c) {
+        if (!empty($conteudo["contato"])) {
+            foreach ($conteudo["contato"] as $k => $c) {
                 if (!empty($c["id"])) {
                     $contato = $this->getDoctrine()
                         ->getRepository(PessoaContato::class)
@@ -148,12 +199,15 @@ class PessoaController extends ControllerController
                     $contato->setTelefone($c["telefone"]);
                     $contato->setEmail($c["email"]);
                     $entityManager->persist($contato);
+                    if ($conteudo["contatoPrincipal"] == $k) {
+                        $pessoa->setContatoPrincipal($contato);
+                    }
                 }
             }
         }
 
-        if(!empty($conteudo["endereco"])) {
-            foreach ($conteudo["endereco"] as $e) {
+        if (!empty($conteudo["endereco"])) {
+            foreach ($conteudo["endereco"] as $k => $e) {
                 if (!empty($e["id"])) {
                     $endereco = $this->getDoctrine()
                         ->getRepository(PessoaEndereco::class)
@@ -180,9 +234,15 @@ class PessoaController extends ControllerController
                     $endereco->setIbgeCidade($e["ibgeCidade"]);
 //                    $endereco->setIbgeEstado($e["ibgeEstado"]);
                     $entityManager->persist($endereco);
+                    if ($conteudo["enderecoPrincipal"] == $k) {
+                        $pessoa->setEnderecoPrincipal($endereco);
+                    }
                 }
             }
         }
+
+        // atualiza contato e endereço principal
+        $entityManager->persist($pessoa);
 
         // actually executes the queries (i.e. the INSERT query)
         $entityManager->flush();

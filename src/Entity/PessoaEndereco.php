@@ -5,6 +5,7 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 use Gedmo\SoftDeleteable\Traits\SoftDeleteableEntity;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\PessoaEnderecoRepository")
@@ -17,6 +18,7 @@ class PessoaEndereco
      * @ORM\Id()
      * @ORM\GeneratedValue()
      * @ORM\Column(type="integer")
+     * @Groups ({"pessoaendereco_default"})
      */
     private $id;
 
@@ -28,36 +30,43 @@ class PessoaEndereco
 
     /**
      * @ORM\Column(type="string", length=50)
+     * @Groups ({"pessoaendereco_default"})
      */
     private $uf;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Groups ({"pessoaendereco_default"})
      */
     private $cidade;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Groups ({"pessoaendereco_default"})
      */
     private $logradouro;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Groups ({"pessoaendereco_default"})
      */
     private $bairro;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
+     * @Groups ({"pessoaendereco_default"})
      */
     private $complemento;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(type="text")
+     * @Groups ({"pessoaendereco_default"})
      */
     private $numero;
 
     /**
      * @ORM\Column(type="integer")
+     * @Groups ({"pessoaendereco_default"})
      */
     private $cep;
 
