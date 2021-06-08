@@ -5,6 +5,7 @@ namespace App\Entity;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\GrupoUsuariosRepository")
@@ -15,12 +16,14 @@ class GrupoUsuarios
      * @ORM\Id()
      * @ORM\GeneratedValue()
      * @ORM\Column(type="integer")
+     * @Groups ({"grupousuario_default"})
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=255)
      * @ORM\JoinColumn(nullable=false)
+     * @Groups ({"grupousuario_default"})
      */
     private $nome;
 

@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use App\Repository\FilialRepository;
 use App\Util\ValueHelper;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 
@@ -45,9 +47,54 @@ class Filial
     private $pulaNf;
 
     /**
-     * @ORM\OneToOne(targetEntity=Pessoa::class, cascade={"persist", "remove"})
+     * @ORM\OneToMany(targetEntity="Pessoa", mappedBy="filial")
      */
-    private $pessoa;
+    private $pessoas; // este é o array de pessoas registradas nessa filial
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Pessoa", inversedBy="filiais")
+     */
+    private $socio; // este é a pessoa DONA desta filial
+
+    /**
+     * @ORM\ManyToMany(targetEntity="User", mappedBy="filiais")
+     */
+    private $usuarios;
+
+    /**
+     * @ORM\OneToMany(targetEntity="User", mappedBy="filialAtiva")
+     */
+    private $usuariosNaFilial;
+
+    public function __construct() {
+        $this->pessoas = new ArrayCollection();
+        $this->usuariosNaFilial = new ArrayCollection();
+        $this->usuarios = new ArrayCollection();
+    }
+
+    /**
+     * @return Collection|User[]
+     */
+    public function getUsers(): ?Collection
+    {
+        return $this->usuarios;
+    }
+    public function addUser(User $user): self
+    {
+        if (!$this->usuarios->contains($user)) {
+            $this->usuarios[] = $user;
+            $user->addFilais($this);
+        }
+        return $this;
+    }
+    public function removeUser(User $user): self
+    {
+        if ($this->usuarios->contains($user)) {
+            $this->usuarios->removeElement($user);
+            $user->removeFiliais($this);
+        }
+        return $this;
+    }
 
     public function getId(): ?int
     {
@@ -102,14 +149,70 @@ class Filial
         return $this;
     }
 
-    public function getPessoa(): ?Pessoa
+    public function getSocio(): ?Pessoa
     {
-        return $this->pessoa;
+        return $this->socio;
     }
 
-    public function setPessoa(?Pessoa $pessoa): self
+    public function setSocio(?Pessoa $pessoa): self
     {
-        $this->pessoa = $pessoa;
+        $this->socio = $pessoa;
+
+        return $this;
+    }
+
+    public function getPessoas(): ?Collection
+    {
+        return $this->pessoas;
+    }
+
+    public function setPessoas(Pessoa $pessoa): self
+    {
+        if (!$this->pessoas->contains($pessoa)) {
+            $this->pessoas[] = $pessoa;
+            $pessoa->setFilial($this);
+        }
+
+        return $this;
+    }
+
+    public function removePessoas(Pessoa $pessoa): self
+    {
+        if ($this->pessoas->contains($pessoa)) {
+            $this->pessoas->removeElement($pessoa);
+            // set the owning side to null (unless already changed)
+            if ($pessoa->getFilial() === $this) {
+                $pessoa->setFilial(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getUsuariosNaFilial(): ?Collection
+    {
+        return $this->usuariosNaFilial;
+    }
+
+    public function setUsuariosNaFilial(User $user): self
+    {
+        if (!$this->usuariosNaFilial->contains($user)) {
+            $this->usuariosNaFilial[] = $user;
+            $user->setFilialAtiva($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUsuariosNaFilial(User $user): self
+    {
+        if ($this->usuariosNaFilial->contains($user)) {
+            $this->usuariosNaFilial->removeElement($user);
+            // set the owning side to null (unless already changed)
+            if ($user->getFilialAtiva() === $this) {
+                $user->setFilialAtiva(null);
+            }
+        }
 
         return $this;
     }
@@ -117,25 +220,31 @@ class Filial
     /**
      * @Groups({"filial_index"})
      */
-    public function getNomeFantasia()
+    public function getNomeFantasia(): ?string
     {
-        return $this->getPessoa()->getNomeFantasia();
+        if(!empty($this->getSocio()))
+            return $this->getSocio()->getNomeFantasia();
+        return '';
     }
 
     /**
      * @Groups({"filial_index"})
      */
-    public function getRazaosocial()
+    public function getRazaosocial(): ?string
     {
-        return $this->getPessoa()->getNome();
+        if(!empty($this->getSocio()))
+            return $this->getSocio()->getNome();
+        return '';
     }
 
     /**
      * @Groups({"filial_index"})
      */
-    public function getCnpj()
+    public function getCnpj(): ?string
     {
-        return $this->getPessoa()->getCpfCnpj();
+        if(!empty($this->getSocio()))
+            return $this->getSocio()->getCpfCnpj();
+        return '';
     }
 
     /**
@@ -143,7 +252,9 @@ class Filial
      */
     public function getEnderecoCompleto(): ?string
     {
-        return $this->getPessoa()->getEnderecoCompleto();
+        if(!empty($this->getSocio()))
+            return $this->getSocio()->getEnderecoCompleto();
+        return '';
     }
 
     /**
@@ -151,7 +262,9 @@ class Filial
      */
     public function getContatoCompleto(): ?string
     {
-        return $this->getPessoa()->getContatoCompleto();
+        if(!empty($this->getSocio()))
+            return $this->getSocio()->getContatoCompleto();
+        return '';
     }
 
     /**

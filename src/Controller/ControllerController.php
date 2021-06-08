@@ -3,6 +3,11 @@
 
 namespace App\Controller;
 
+use App\Service\Notify;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Mapping\Entity;
+use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -18,10 +23,24 @@ use Symfony\Component\Serializer\Mapping\Loader\AnnotationLoader;
 
 class ControllerController extends AbstractController
 {
+
     protected $entity;
-    protected $repository;
-    protected $notify;
-    protected $em;
+
+    /**
+     * @var ServiceEntityRepository
+     */
+    protected ServiceEntityRepository $repository;
+
+    /**
+     * @var Notify
+     */
+    protected Notify $notify;
+
+    /**
+     * @var EntityManager
+     */
+    protected EntityManager $em;
+
     protected $createdEntity;
 
     /**
@@ -34,7 +53,7 @@ class ControllerController extends AbstractController
      * @deprecated
      */
     // renderizar dentro das páginas de edição
-    protected function single($id, array $grupos = [], array $propriedades = [], array $ignorados = [])
+    protected function single($id, array $grupos = [], array $propriedades = [], array $ignorados = []): string
     {
         // se for em branco retornar antes de consultar no db
         if ($id == 0) {
@@ -67,7 +86,7 @@ class ControllerController extends AbstractController
      * @throws ExceptionInterface
      * @deprecated
      */
-    protected function lista(Request $request, array $grupos = [], array $propriedades = [], array $ignorados = [], array $order = [])
+    protected function lista(Request $request, array $grupos = [], array $propriedades = [], array $ignorados = [], array $order = []): string
     {
         $ignorados = array_merge(array("__initializer__", "__cloner__", "__isInitialized__"), $ignorados);
         $conteudo = $request->query->all();
@@ -137,13 +156,13 @@ class ControllerController extends AbstractController
      * @param ValidatorInterface $validator
      * @param string $entityName
      * @return JsonResponse
-     * @throws \Exception
+     * @throws Exception
      */
     protected function insertOrUpdate(ValidatorInterface $validator, string $entityName) :JsonResponse
     {
         $errors = $validator->validate($this->createdEntity);
         if (count($errors) > 0) {
-            throw new \Exception($errors);
+            throw new Exception($errors);
         }
 
         $this->em->persist($this->createdEntity);

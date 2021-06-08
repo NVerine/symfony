@@ -6,6 +6,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\UserRepository")
@@ -16,11 +17,13 @@ class User implements UserInterface
      * @ORM\Id()
      * @ORM\GeneratedValue()
      * @ORM\Column(type="integer")
+     * @Groups ({"user_default"})
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=180, unique=true)
+     * @Groups ({"user_default"})
      */
     private $username;
 
@@ -52,10 +55,44 @@ class User implements UserInterface
       */
      private $userTokens;
 
+    /**
+     * @ORM\ManyToMany(targetEntity="Filial", inversedBy="usuarios")
+     */
+    private $filiais;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Filial", inversedBy="usuariosNaFilial")
+     * @ORM\JoinColumn(nullable=true)
+     */
+    private $filialAtiva;
+
      public function __construct()
      {
          $this->userTokens = new ArrayCollection();
+         $this->filiais = new ArrayCollection();
      }
+
+    /**
+     * @return Collection|Filial[]
+     */
+    public function getFiliais(): ?Collection
+    {
+        return $this->filiais;
+    }
+    public function addFilais(Filial $filial): self
+    {
+        if (!$this->filiais->contains($filial)) {
+            $this->filiais[] = $filial;
+        }
+        return $this;
+    }
+    public function removeFiliais(Filial $filial): self
+    {
+        if ($this->filiais->contains($filial)) {
+            $this->filiais->removeElement($filial);
+        }
+        return $this;
+    }
 
     /**
      * @return mixed
@@ -148,7 +185,9 @@ class User implements UserInterface
 
     public function getNomeGrupo(): string
     {
-        return (string) $this->grupo->getNome();
+        if(!empty($this->grupo))
+            return (string) $this->grupo->getNome();
+        return '';
     }
 
     public function getPessoa(): ?Pessoa
@@ -163,10 +202,21 @@ class User implements UserInterface
         return $this;
     }
 
+    public function getFilialAtiva(): ?Filial
+    {
+        return $this->filialAtiva;
+    }
+
+    public function setFilialAtiva(Filial $filial): self
+    {
+        $this->filialAtiva = $filial;
+        return $this;
+    }
+
     /**
      * @return Collection|UserTokens[]
      */
-    public function getUserTokens(): Collection
+    public function getUserTokens(): ?Collection
     {
         return $this->userTokens;
     }

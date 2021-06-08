@@ -2,6 +2,7 @@
 
 namespace App\EventSubscriber;
 
+use App\Controller\Api\PermissoesController;
 use App\Entity\Permissoes;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -44,36 +45,39 @@ class ControllerSubscriber implements EventSubscriberInterface
         if ($user == "anon.") return;
 
         $request = $event->getRequest();
-        $route  = $request->attributes->get('_route');
+        $route = $request->attributes->get('_route');
 
         // salva as permissões na session, para minimizar os requests em bd
         //if (empty($this->session->get("permissoes"))){
-            if($token->getUser()){
-                $grupo = $token->getUser()->getGrupo()->getId();
-                $permissoes = $this->em->getRepository(Permissoes::class)->findBy(array("grupo" => $grupo));
+        if ($token->getUser()) {
+            $grupo = $token->getUser()->getGrupo()->getId();
+            $permissoes = $this->em->getRepository(Permissoes::class)->findBy(array("grupo" => $grupo));
 
-                $session = new Session(new NativeSessionStorage(), new AttributeBag());
-                $session->set('permissoes', $permissoes);
-            }
+            $session = new Session(new NativeSessionStorage(), new AttributeBag());
+            $session->set('permissoes', $permissoes);
+        }
         //}
 
-        if ($user->getGrupo()->getId() == 1) return;
-
-        $permissoes = $this->session->get("permissoes");
-
         $bloqueado = true;
-        /**
-         * @var $p Permissoes
-         */
-        foreach ($permissoes as $p){
-            if($p->getRota() == $route || substr($route, 0, 1) == "_"){
-                $bloqueado = false;
-                break;
+
+        if (!in_array($route, PermissoesController::$rotas_bloqueadas)) {
+            // superadmin tem bypass no dev
+            if ($user->getGrupo()->getId() == 1) return;
+
+            $permissoes = $this->session->get("permissoes");
+            /**
+             * @var $p Permissoes
+             */
+            foreach ($permissoes as $p) {
+                if ($p->getRota() == $route || substr($route, 0, 1) == "_") {
+                    $bloqueado = false;
+                    break;
+                }
             }
         }
 
-        if($bloqueado){
-            throw new \Exception("<b>Sem permissão nesta rota</b> '".$route."'");
+        if ($bloqueado) {
+            throw new \Exception("<b>Sem permissão nesta rota</b> '" . $route . "'");
         }
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use Doctrine\ORM\Query;
 use Doctrine\ORM\QueryBuilder;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -24,12 +25,22 @@ class SQLHelper
             $pag = $pag * $limit;
         }
 
-        if (!empty($order)) {
-            $queryBuilder->orderBy('t.' . $order[0], $order[1]);
-        }
-
         $queryBuilder->setFirstResult($pag)->setMaxResults($limit);
 
         return $queryBuilder;
+    }
+
+    /**
+     * Retorna um array de resultados ou null
+     * @param $qb
+     * @return array|null
+     */
+    public static function getResultsOrNull($qb): ?array
+    {
+        $retorno = $qb->getQuery()
+        ->setHint(Query::HINT_FORCE_PARTIAL_LOAD, true)
+        ->getResult();
+        if(empty($retorno)) return null;
+        return $retorno;
     }
 }

@@ -100,26 +100,31 @@ class Pessoa
     private $empresa = false;
 
     /**
-     * @ORM\OneToMany(targetEntity="App\Entity\PessoaEndereco", mappedBy="pessoa")
+     * @ORM\OneToMany(targetEntity="PessoaEndereco", mappedBy="pessoa")
      * @Groups ({"pessoa_default"})
      */
     private $endereco;
 
     /**
-     * @ORM\OneToMany(targetEntity="App\Entity\PessoaContato", mappedBy="pessoa")
+     * @ORM\OneToMany(targetEntity="PessoaContato", mappedBy="pessoa")
      * @Groups ({"pessoa_default"})
      */
     private $contato;
 
     /**
-     * @ORM\OneToMany(targetEntity="App\Entity\User", mappedBy="pessoa")
+     * @ORM\OneToMany(targetEntity="User", mappedBy="pessoa")
      */
     private $user;
 
     /**
-     * @ORM\OneToOne(targetEntity="App\Entity\Filial", mappedBy="pessoa")
+     * @ORM\ManyToOne(targetEntity="Filial", inversedBy="pessoas")
      */
-    private $filial;
+    private $filial; //esse é a relação de onde a pessoa esta registrada
+
+    /**
+     * @ORM\OneToMany(targetEntity="Filial", mappedBy="socio")
+     */
+    private $filiais; // este é o array de filiais em que esta pessoa é dona
 
     /**
      * @ORM\OneToOne(targetEntity=PessoaEndereco::class, cascade={"persist", "remove"})
@@ -144,6 +149,7 @@ class Pessoa
         $this->contato = new ArrayCollection();
         $this->comercials = new ArrayCollection();
         $this->user = new ArrayCollection();
+        $this->filiais = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -168,7 +174,7 @@ class Pessoa
      */
     public function getFullTipo(): string
     {
-        if($this->tipo == "j") return "Jurídica";
+        if($this->tipo == "J") return "Jurídica";
         return "Física";
     }
 
@@ -467,19 +473,42 @@ class Pessoa
         return $this;
     }
 
+    public function getFiliais(): ?Collection
+    {
+        return $this->filiais;
+    }
+
+    public function addFiliais(Filial $filial): self
+    {
+        if (!$this->filiais->contains($filial)) {
+            $this->filiais[] = $filial;
+            $filial->setSocio($this);
+        }
+
+        return $this;
+    }
+
+    public function removeFiliais(Filial $filial): self
+    {
+        if ($this->filiais->contains($filial)) {
+            $this->filiais->removeElement($filial);
+            // set the owning side to null (unless already changed)
+            if ($filial->getSocio() === $this) {
+                $filial->setSocio(null);
+            }
+        }
+
+        return $this;
+    }
+
     public function getFilial(): ?Filial
     {
         return $this->filial;
     }
 
-    public function setFilial(Filial $filial): self
+    public function setFilial(?Filial $filial): self
     {
         $this->filial = $filial;
-
-        // set the owning side of the relation if necessary
-        if ($filial->getPessoa() !== $this) {
-            $filial->setPessoa($this);
-        }
 
         return $this;
     }

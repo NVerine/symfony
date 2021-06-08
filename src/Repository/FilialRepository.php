@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\Filial;
 use App\Service\SQLHelper;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\Query;
 use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\Persistence\ManagerRegistry;
@@ -25,15 +26,15 @@ class FilialRepository extends ServiceEntityRepository
 
     /**
      * @return Filial[] Returns an array of Filial objects
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NonUniqueResultException
      */
     public function loadLoggedFilial($value)
     {
         return $this->createQueryBuilder('f')
             ->select('f', 'p', 'c', 'e')
-            ->innerJoin('f.pessoa', 'p', Join::WITH)
-            ->innerJoin('p.contatoPrincipal', 'c', Join::WITH)
-            ->innerJoin('p.enderecoPrincipal', 'e', Join::WITH)
+            ->leftJoin('f.socio', 'p', Join::WITH)
+            ->leftJoin('p.contatoPrincipal', 'c', Join::WITH)
+            ->leftJoin('p.enderecoPrincipal', 'e', Join::WITH)
             ->andWhere('f.id = :val')
             ->setParameter('val', $value)
             ->getQuery()
@@ -45,18 +46,18 @@ class FilialRepository extends ServiceEntityRepository
      * @param Request|null $request
      * @param null $id
      * @return int|mixed|string
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NonUniqueResultException
      */
     public function fetch(Request $request = null, $id = null)
     {
         $qb = $this->createQueryBuilder('tb')
-//            ->select('pessoa', 'comercial', 'item', 'produto')
-//            ->innerJoin('comercial.cliente', 'pessoa')
-//            ->innerJoin('comercial.comercialItens', 'item')
-//            ->innerJoin('item.produto', 'produto')
+            ->select('tb', 'socio', 'contatoPrincipal', 'enderecoPrincipal')
+            ->innerJoin('tb.socio', 'socio')
+            ->innerJoin('socio.contatoPrincipal', 'contatoPrincipal')
+            ->innerJoin('socio.enderecoPrincipal', 'enderecoPrincipal')
         ;
 
-        if($id > 0) {
+        if(!is_null($id)) {
             return $qb
                 ->andWhere('tb.id = :val')
                 ->setParameter('val', $id)
@@ -65,12 +66,10 @@ class FilialRepository extends ServiceEntityRepository
                 ->getOneOrNullResult();
         }
 
-        $this->createWhere($request, $qb);
+        $qb->orderBy('tb.id', 'DESC');
 
-        return SQLHelper::setPagination($request, $qb)
-            ->getQuery()
-            ->setHint(Query::HINT_FORCE_PARTIAL_LOAD, true)
-            ->getResult();
+        $this->createWhere($request, $qb);
+        return SQLHelper::getResultsOrNull(SQLHelper::setPagination($request, $qb));
     }
 
     private function createWhere(Request $request, &$qb)

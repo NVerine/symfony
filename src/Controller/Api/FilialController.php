@@ -7,12 +7,15 @@ use App\Entity\Filial;
 use App\Entity\Pessoa;
 use App\Repository\FilialRepository;
 use App\Service\Notify;
+use App\Traits\Response;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\OptimisticLockException;
+use Doctrine\ORM\ORMException;
+use Exception;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 /**
@@ -20,6 +23,7 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
  */
 class FilialController extends ControllerController
 {
+    use Response;
 
     /**
      * atentar para ordenação
@@ -55,16 +59,26 @@ class FilialController extends ControllerController
      * @Route("/", name="api_filial_index", methods={"GET"})
      * @param Request $request
      * @return JsonResponse
-     * @throws ExceptionInterface|NonUniqueResultException
+     * @throws NonUniqueResultException
      */
     public function index(Request $request): JsonResponse
     {
-        return $this->notifyReturn(
-            parent::serialize(
-                ["headers" => self::$headers, "items" => $this->repository->fetch($request)],
-                ["filial_default", "filial_index"]
-            )
+        return $this->response(
+            $this->repository->fetch($request),
+            self::$headers,
+            ["filial_default", "filial_index"]
         );
+    }
+
+    /**
+     * @Route("/lista", name="api_filial_list", methods={"GET"})
+     * @param Request $request
+     * @return JsonResponse
+     * @throws NonUniqueResultException
+     */
+    public function list(Request $request): JsonResponse
+    {
+        return $this->index($request);
     }
 
     /**
@@ -72,18 +86,24 @@ class FilialController extends ControllerController
      * @param $id
      * @param Request $request
      * @return JsonResponse
-     * @throws ExceptionInterface
      * @throws NonUniqueResultException
      */
     public function show($id, Request $request): JsonResponse
     {
-        return $this->notifyReturn(parent::serialize($this->repository->fetch($request, $id)));
-//        return $this->notifyReturn(parent::single($id, [], [], ["pessoa" => "contato", "endereco", "user"]));
+        return $this->response(
+            $this->repository->fetch($request, $id)
+        );
     }
 
     /**
      * @Route("/{id}/edit", name="api_filial_edit", methods={"POST"})
-     * @throws \Exception
+     * @param $id
+     * @param ValidatorInterface $validator
+     * @param Request $request
+     * @return JsonResponse
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @throws Exception
      */
     public function edit($id, ValidatorInterface $validator, Request $request): JsonResponse
     {
@@ -119,15 +139,25 @@ class FilialController extends ControllerController
             return $this->notifyReturn("");
         }
 
+        if(empty($pessoa->getContatoPrincipal())){
+            $this->notify->addMessage($this->notify::TIPO_ERROR, "Pessoa selecionada não é possui um contato principal");
+            return $this->notifyReturn("");
+        }
+
+        if(empty($pessoa->getEnderecoPrincipal())){
+            $this->notify->addMessage($this->notify::TIPO_ERROR, "Pessoa selecionada não é possui um endereço principal");
+            return $this->notifyReturn("");
+        }
+
         $item->setPulaNf($conteudo["pulaNf"]);
-        $item->setPessoa($pessoa);
+        $item->setSocio($pessoa);
         $item->setNome($conteudo["nome"]);
         $item->setRegimeTributario($conteudo["regimeTributario"]);
         $item->setTimezone($conteudo["timezone"]);
 
         $errors = $validator->validate($item);
         if (count($errors) > 0) {
-            throw new \Exception($errors);
+            throw new Exception($errors);
         }
 
         $entityManager->persist($item);

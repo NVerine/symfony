@@ -8,6 +8,7 @@ use App\Entity\PessoaContato;
 use App\Entity\PessoaEndereco;
 use App\Repository\PessoaRepository;
 use App\Service\Notify;
+use App\Traits\Response;
 use App\Util\ValueHelper;
 use Doctrine\ORM\NonUniqueResultException;
 use Exception;
@@ -22,6 +23,7 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
  */
 class PessoaController extends ControllerController
 {
+    use Response;
     /**
      * atentar para ordenação
      * @var array
@@ -60,16 +62,26 @@ class PessoaController extends ControllerController
      * @Route("/", name="api_pessoa_index", methods={"GET"})
      * @param Request $request
      * @return JsonResponse
-     * @throws ExceptionInterface
-     * @throws NonUniqueResultException
+     * @throws NonUniqueResultException|ExceptionInterface
      */
     public function index(Request $request): JsonResponse
     {
-        return $this->notifyReturn(
-            parent::serialize(
-                ["headers" => self::$headers, "items" => $this->repository->fetch($request)],
-                ["pessoa_default", "pessoaendereco_default", "pessoacontato_default", "pessoa_index"]
-            )
+//        $items = $this->repository->fetch($request);
+//        dump($items);
+//        return $this->notifyReturn(
+//            parent::serialize(
+//                [
+////                    "headers" => self::$headers,
+//                    "items" => $items
+//                ],
+////                ["pessoa_default", "pessoaendereco_default", "pessoacontato_default", "pessoa_index"]
+//            )
+//        );
+
+        return $this->response(
+            $this->repository->fetch($request),
+            self::$headers,
+            ["pessoa_default", "pessoaendereco_default", "pessoacontato_default", "pessoa_index"]
         );
     }
 
@@ -77,21 +89,11 @@ class PessoaController extends ControllerController
      * @Route("/autocomplete/nome", name="_api_pessoa_autocomplete_nome", methods={"GET"})
      * @param Request $request
      * @return JsonResponse
+     * @throws NonUniqueResultException
      */
     public function autocompleto(Request $request): JsonResponse
     {
-        $conteudo = $request->query->all();
-
-        $pessoa = $this->getDoctrine()
-            ->getRepository(Pessoa::class)
-            ->createQueryBuilder('a')
-            ->where('a.nome LIKE :nome')
-            ->setParameter('nome', $conteudo["pesq_nome"] . "%")
-            ->setFirstResult(0)
-            ->setMaxResults(10)
-            ->getQuery()
-            ->getResult();
-
+        $pessoa = $this->repository->fetch($request);
         $temp = array();
         /**
          * @var $p Pessoa
@@ -109,7 +111,6 @@ class PessoaController extends ControllerController
             200,
             array('Symfony-Debug-Toolbar-Replace' => 1)
         );
-
     }
 
     /**
@@ -118,11 +119,12 @@ class PessoaController extends ControllerController
      * @param Request $request
      * @return JsonResponse
      * @throws NonUniqueResultException
-     * @throws ExceptionInterface
      */
     public function show($id, Request $request): JsonResponse
     {
-        return $this->notifyReturn(parent::serialize($this->repository->fetch($request, $id), [], [], ['user', 'filial', 'comercials']));
+        return $this->response(
+            $this->repository->fetch($request, $id)
+        );
     }
 
     /**
@@ -160,6 +162,7 @@ class PessoaController extends ControllerController
         $pessoa->setNome($conteudo["nome"]);
         $pessoa->setTipo($conteudo["tipo"]);
         $pessoa->setCpfCnpj($conteudo["cpfCnpj"]);
+        dump($conteudo);
         if (!empty($conteudo["dataNascimento"])) {
             $data = \DateTime::createFromFormat('d-m-Y', $conteudo["dataNascimento"]);
             $pessoa->setDataNascimento($data);

@@ -3,8 +3,13 @@
 namespace App\Repository;
 
 use App\Entity\User;
+use App\Service\SQLHelper;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\Query;
+use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -36,32 +41,70 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         $this->_em->flush();
     }
 
-    // /**
-    //  * @return User[] Returns an array of User objects
-    //  */
-    /*
-    public function findByExampleField($value)
+    /**
+     * @param Request|null $request
+     * @param null $id
+     * @return int|mixed|string
+     * @throws NonUniqueResultException
+     */
+    public function fetch(Request $request = null, $id = null)
     {
-        return $this->createQueryBuilder('u')
-            ->andWhere('u.exampleField = :val')
-            ->setParameter('val', $value)
-            ->orderBy('u.id', 'ASC')
-            ->setMaxResults(10)
-            ->getQuery()
-            ->getResult()
-        ;
-    }
-    */
+        $qb = $this->createQueryBuilder('tb')
+            ->select('tb', 'ps', 'gp', 'fl')
+            ->leftJoin('tb.grupo', 'gp')
+            ->leftJoin('tb.pessoa', 'ps')
+            ->leftJoin('tb.filiais', 'fl');
+//            ->leftJoin('tb.contatoPrincipal', 'contatoPrincipal');
 
-    /*
-    public function findOneBySomeField($value): ?User
-    {
-        return $this->createQueryBuilder('u')
-            ->andWhere('u.exampleField = :val')
-            ->setParameter('val', $value)
-            ->getQuery()
-            ->getOneOrNullResult()
-        ;
+        if(!is_null($id)) {
+            return $qb//->addSelect('endereco', 'contato')
+//                ->leftJoin('tb.endereco', 'endereco')
+//                ->leftJoin('tb.contato', 'contato')
+                ->andWhere('tb.id = :val')
+                ->setParameter('val', $id)
+                ->getQuery()
+                ->setHint(Query::HINT_FORCE_PARTIAL_LOAD, true)
+                ->getOneOrNullResult();
+        }
+
+        $qb->orderBy('tb.id', 'DESC');
+
+        $this->createWhere($request, $qb);
+        return SQLHelper::getResultsOrNull(SQLHelper::setPagination($request, $qb));
     }
-    */
+
+    /**
+     * @param Request $request
+     * @param QueryBuilder $qb
+     * @return mixed
+     */
+    private function createWhere(Request $request, QueryBuilder &$qb): QueryBuilder
+    {
+        $conteudo = $request->query->all();
+        $qb->where('1 = 1');
+
+        dump($request->query->all());
+
+        if (isset($conteudo["username"]) && !empty($conteudo["username"])){
+            $qb->andWhere('tb.username = :username')->setParameter('username', $conteudo["username"]);
+        }
+
+        return $qb;
+    }
+
+    /**
+     * @param string $username
+     * @return array|null
+     */
+    public function login(string $username){
+        $qb = $this->createQueryBuilder('tb')
+            ->select('tb', 'ps', 'gp', 'fl')
+            ->leftJoin('tb.grupo', 'gp')
+            ->leftJoin('tb.pessoa', 'ps')
+            ->leftJoin('tb.filiais', 'fl')
+            ->andWhere('tb.username = :username')
+            ->setParameter('username', $username);
+
+        return SQLHelper::getResultsOrNull($qb);
+    }
 }

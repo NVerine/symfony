@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Filial;
 use App\Entity\GrupoUsuarios;
 use App\Entity\Pessoa;
 use App\Entity\User;
@@ -31,7 +32,7 @@ class SecurityController extends AbstractController
 
         $usuario = $this->getDoctrine()
             ->getRepository(User::class)
-            ->findBy(array("username" => $request->request->get("username")));
+            ->login($data["username"]);
 
         if(empty($usuario)){
             throw new \Exception("Username não encontrado");
@@ -60,8 +61,14 @@ class SecurityController extends AbstractController
         $em->flush();
 
         $retorno["token"] = $random;
-        $retorno["date"] = $date;
+        $retorno["date"] = $date->format('d-m-Y H:i:s');
+        $retorno["usuario_nome"] = $usuario->getPessoa()->getNome();
+        $retorno["usuario_id"] = $usuario->getId();
         $retorno["username"] = $request->request->get("username");
+        $retorno["grupo"] = $usuario->getGrupo()->getNome();
+        $retorno["foto"] = "ablab";
+        $retorno["filial_nome"] = "teste";
+        $retorno["filial_id"] = 1;
 
         return JsonResponse::fromJsonString(
             $notify->newReturn(json_encode($retorno)),
@@ -103,36 +110,45 @@ class SecurityController extends AbstractController
 
             $grupo = new GrupoUsuarios();
             $grupo->setNome("Super Administrador");
-
-            // tell Doctrine you want to (eventually) save the Product (no queries yet)
             $em->persist($grupo);
 
+            $filial = new Filial();
+            $filial->setNome("Filial padrão");
+            $filial->setRegimeTributario(1);
+            $em->persist($filial);
 
-            // mandar isso pra uma migration
-//            $pessoa = new Pessoa();
-//            $pessoa->setNome("Super Administrador");
-//            $pessoa->setTipo("F");
-////            $pessoa->set
-//            $pessoa->setNomeFantasia("Super Admin");
-//            $pessoa->setCpfCnpj("000.000.000-00");
-//            $pessoa->setAtivo(true);
-//
-//            // cria uma pessoa antes
-//            $pessoa = new Pessoa();
-//            $pessoa->setNome("Empresa padrão");
-//            $pessoa->setTipo("J");
-//            $pessoa->setNomeFantasia("Empresa padrão");
-//            $pessoa->setCpfCnpj("99.999.999/9999-99");
-//            $pessoa->setAtivo(true);
-//            $pessoa->setEmpresa(true);
-//
-//            // cria uma pessoa antes
-//            $pessoa = new Pessoa();
-//            $pessoa->setNome("Super Administrador");
-//            $pessoa->setTipo("F");
-//            $pessoa->setNomeFantasia("Super Admin");
-//            $pessoa->setCpfCnpj("000.000.000-00");
-//            $pessoa->setAtivo(true);
+//             mandar isso pra uma migration
+            $pessoa = new Pessoa();
+            $pessoa->setNome("Super Administrador");
+            $pessoa->setTipo("F");
+            $pessoa->setNomeFantasia("Super Admin");
+            $pessoa->setCpfCnpj("000.000.000-00");
+            $pessoa->setAtivo(true);
+            $pessoa->setFilial($filial);
+            $em->persist($pessoa);
+
+            // cria uma pessoa antes
+            $pessoa = new Pessoa();
+            $pessoa->setNome("Empresa padrão");
+            $pessoa->setTipo("J");
+            $pessoa->setNomeFantasia("Empresa padrão");
+            $pessoa->setCpfCnpj("99.999.999/9999-99");
+            $pessoa->setAtivo(true);
+            $pessoa->setEmpresa(true);
+            $pessoa->setFilial($filial);
+            $em->persist($pessoa);
+
+            $filial->setSocio($pessoa);
+            $em->persist($filial);
+
+            // cria uma pessoa antes
+            $pessoa = new Pessoa();
+            $pessoa->setNome("Super Administrador");
+            $pessoa->setTipo("F");
+            $pessoa->setNomeFantasia("Super Admin");
+            $pessoa->setCpfCnpj("000.000.000-00");
+            $pessoa->setFilial($filial);
+            $pessoa->setAtivo(true);
 
             $em->persist($pessoa);
             // TODO salvar pessoa endereço e pessoa contato aqui
@@ -144,6 +160,7 @@ class SecurityController extends AbstractController
             $usuario->setPessoa($pessoa);
             $usuario->setUsername("Administrador");
             $usuario->setUsername("admin");
+            $usuario->setFilialAtiva($filial);
             $usuario->setGrupo($grupo);  // grupo superadmin
 
             // 3) salva o usuario
@@ -154,6 +171,7 @@ class SecurityController extends AbstractController
 
             // actually executes the queries (i.e. the INSERT query)
             $em->flush();
+            dump($usuario, $grupo);
         }
     }
 }

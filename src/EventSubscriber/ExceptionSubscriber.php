@@ -26,14 +26,17 @@ class ExceptionSubscriber implements EventSubscriberInterface
     public function onKernelException(ExceptionEvent $event)
     {
         $exception = $event->getThrowable();
-        $file = $exception->getFile();
+        $files = $exception->getTrace();
 
-        if (strpos($file, 'src') !== false) {
-            $file = explode("src", $file);
-            $file = $file[1];
+        $trace = "";
+        foreach ($files as $r){
+            if (strpos($r["file"], '/src/') !== false) {
+                $f = explode("/src/", $r["file"]);
+                $trace .= $f[1]."::".$r["line"]."<br>";
+            }
         }
-        $trace = $file." - L".$exception->getLine();
-        $message = $trace." ".utf8_encode($exception->getMessage());
+
+        $message = $trace." ".$exception->getMessage();
 
         $this->notify->addMessage($this->notify::TIPO_ERROR, $message);
         $customResponse = JsonResponse::fromJsonString(

@@ -32,34 +32,25 @@ class GrupoUsuariosRepository extends ServiceEntityRepository
      */
     public function fetch(Request $request, $id = null, array $order = [])
     {
-        if ($id == '0'){
-            return null;
-        }
         $qb = $this->createQueryBuilder('tb')
-            ->select('tb', 'permissoes')
-            ->innerJoin('tb.permissoes', 'permissoes')
-        ;
+            ->select('tb');
 
-        if($id > 0) {
+
+        if(!is_null($id)) {
             return $qb
+                ->addSelect('permissoes')
+                ->leftJoin('tb.permissoes', 'permissoes')
                 ->andWhere('tb.id = :val')
-                ->addSelect()
                 ->setParameter('val', $id)
                 ->getQuery()
                 ->setHint(Query::HINT_FORCE_PARTIAL_LOAD, true)
                 ->getOneOrNullResult();
         }
 
+        $qb->orderBy('tb.id', 'DESC');
+
         $this->createWhere($request, $qb);
-
-        foreach ($order as $k=>$r){
-            $qb = $qb->addOrderBy($k, $r);
-        }
-
-        return SQLHelper::setPagination($request, $qb)
-            ->getQuery()
-            ->setHint(Query::HINT_FORCE_PARTIAL_LOAD, true)
-            ->getResult();
+        return SQLHelper::getResultsOrNull(SQLHelper::setPagination($request, $qb));
     }
 
     private function createWhere(Request $request, &$qb)
