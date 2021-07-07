@@ -45,8 +45,14 @@ com os comandos:
 Neste caso será criado apenas o container com a aplicação. 
 Os argumentos do DB devem ser ajustados de acordo com o seu caso.
 
+### para rodar testes
+vendor/bin/simple-phpunit
+XDEBUG_MODE=coverage vendor/bin/simple-phpunit --coverage-html var/coverage
+
 ### Exemplos
 API: https://nverine-demo-api.azurewebsites.net/
 Completo (interface+api): https://nverine-demo.azurewebsites.net/
+
+
 
 

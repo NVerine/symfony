@@ -31,5 +31,10 @@ services:
             - { name: kernel.event_subscriber, event: kernel.exception }
 
     # get routes
-    getroutes:
+    nverine.getroutes:
         class: 'App\Controller\Api\PermissoesController'
+
+    # custom notify
+    nverine.notify:
+        class: 'App\Service\Notify'
+        public: true

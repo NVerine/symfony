@@ -13,6 +13,10 @@ use Symfony\Component\Serializer\Annotation\Groups;
  */
 class Pessoa
 {
+    // registros protegidos
+    const protected_reg = [1, 2, 3];
+    const super_adm = 1;
+
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()

@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <title>Dashboard for /var/www/symfony/src/Repository</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="../.css/bootstrap.min.css" rel="stylesheet" type="text/css">
+  <link href="../.css/nv.d3.min.css" rel="stylesheet" type="text/css">
+  <link href="../.css/style.css" rel="stylesheet" type="text/css">
+  <link href="../.css/custom.css" rel="stylesheet" type="text/css">
+ </head>
+ <body>
+  <header>
+   <div class="container-fluid">
+    <div class="row">
+     <div class="col-md-12">
+      <nav aria-label="breadcrumb">
+       <ol class="breadcrumb">
+         <li class="breadcrumb-item"><a href="../index.html">/var/www/symfony/src</a></li>
+         <li class="breadcrumb-item"><a href="index.html">Repository</a></li>
+         <li class="breadcrumb-item active">(Dashboard)</li>
+
+       </ol>
+      </nav>
+     </div>
+    </div>
+   </div>
+  </header>
+  <div class="container-fluid">
+   <div class="row">
+    <div class="col-md-12">
+     <h2>Classes</h2>
+    </div>
+   </div>
+   <div class="row">
+    <div class="col-md-6">
+     <h3>Coverage Distribution</h3>
+     <div id="classCoverageDistribution" style="height: 300px;">
+       <svg></svg>
+     </div>
+    </div>
+    <div class="col-md-6">
+     <h3>Complexity</h3>
+     <div id="classComplexity" style="height: 300px;">
+       <svg></svg>
+     </div>
+    </div>
+   </div>
+   <div class="row">
+    <div class="col-md-6">
+     <h3>Insufficient Coverage</h3>
+     <div class="scrollbox">
+      <table class="table">
+       <thead>
+        <tr>
+         <th>Class</th>
+         <th class="text-right">Coverage</th>
+        </tr>
+       </thead>
+       <tbody>
+       <tr><td><a href="ComercialItensRepository.php.html#15">App\Repository\ComercialItensRepository</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="QuestionsOPTRepository.php.html#15">App\Repository\QuestionsOPTRepository</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="UserRepository.php.html#23">App\Repository\UserRepository</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="TribTipoOperacaoRepository.php.html#19">App\Repository\TribTipoOperacaoRepository</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="TribNCMRepository.php.html#19">App\Repository\TribNCMRepository</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="TribCSTRepository.php.html#19">App\Repository\TribCSTRepository</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="TribCFOPRepository.php.html#19">App\Repository\TribCFOPRepository</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="QuizRepository.php.html#15">App\Repository\QuizRepository</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="QuizQuestionsRepository.php.html#15">App\Repository\QuizQuestionsRepository</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="QuestionsRepository.php.html#15">App\Repository\QuestionsRepository</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ProdutoRepository.php.html#19">App\Repository\ProdutoRepository</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ComercialRepository.php.html#19">App\Repository\ComercialRepository</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="PessoaRepository.php.html#20">App\Repository\PessoaRepository</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="PessoaEnderecoRepository.php.html#15">App\Repository\PessoaEnderecoRepository</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="PessoaContatoRepository.php.html#15">App\Repository\PessoaContatoRepository</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="PermissoesRepository.php.html#15">App\Repository\PermissoesRepository</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="GrupoUsuariosRepository.php.html#19">App\Repository\GrupoUsuariosRepository</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="FilialRepository.php.html#20">App\Repository\FilialRepository</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="FamiliaProdutoRepository.php.html#19">App\Repository\FamiliaProdutoRepository</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="DisciplinaRepository.php.html#15">App\Repository\DisciplinaRepository</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="UserTokensRepository.php.html#17">App\Repository\UserTokensRepository</a></td><td class="text-right">0%</td></tr>
+
+       </tbody>
+      </table>
+     </div>
+    </div>
+    <div class="col-md-6">
+     <h3>Project Risks</h3>
+     <div class="scrollbox">
+      <table class="table">
+       <thead>
+        <tr>
+         <th>Class</th>
+         <th class="text-right"><abbr title="Change Risk Anti-Patterns (CRAP) Index">CRAP</abbr></th>
+        </tr>
+       </thead>
+       <tbody>
+       <tr><td><a href="PessoaRepository.php.html#20">App\Repository\PessoaRepository</a></td><td class="text-right">342</td></tr>
+       <tr><td><a href="TribCSTRepository.php.html#19">App\Repository\TribCSTRepository</a></td><td class="text-right">110</td></tr>
+       <tr><td><a href="UserRepository.php.html#23">App\Repository\UserRepository</a></td><td class="text-right">90</td></tr>
+       <tr><td><a href="ProdutoRepository.php.html#19">App\Repository\ProdutoRepository</a></td><td class="text-right">72</td></tr>
+       <tr><td><a href="FamiliaProdutoRepository.php.html#19">App\Repository\FamiliaProdutoRepository</a></td><td class="text-right">42</td></tr>
+       <tr><td><a href="TribCFOPRepository.php.html#19">App\Repository\TribCFOPRepository</a></td><td class="text-right">42</td></tr>
+       <tr><td><a href="TribNCMRepository.php.html#19">App\Repository\TribNCMRepository</a></td><td class="text-right">42</td></tr>
+       <tr><td><a href="TribTipoOperacaoRepository.php.html#19">App\Repository\TribTipoOperacaoRepository</a></td><td class="text-right">42</td></tr>
+       <tr><td><a href="FilialRepository.php.html#20">App\Repository\FilialRepository</a></td><td class="text-right">30</td></tr>
+       <tr><td><a href="ComercialRepository.php.html#19">App\Repository\ComercialRepository</a></td><td class="text-right">20</td></tr>
+       <tr><td><a href="GrupoUsuariosRepository.php.html#19">App\Repository\GrupoUsuariosRepository</a></td><td class="text-right">20</td></tr>
+
+       </tbody>
+      </table>
+     </div>
+    </div>
+   </div>
+   <div class="row">
+    <div class="col-md-12">
+     <h2>Methods</h2>
+    </div>
+   </div>
+   <div class="row">
+    <div class="col-md-6">
+     <h3>Coverage Distribution</h3>
+     <div id="methodCoverageDistribution" style="height: 300px;">
+       <svg></svg>
+     </div>
+    </div>
+    <div class="col-md-6">
+     <h3>Complexity</h3>
+     <div id="methodComplexity" style="height: 300px;">
+       <svg></svg>
+     </div>
+    </div>
+   </div>
+   <div class="row">
+    <div class="col-md-6">
+     <h3>Insufficient Coverage</h3>
+     <div class="scrollbox">
+      <table class="table">
+       <thead>
+        <tr>
+         <th>Method</th>
+         <th class="text-right">Coverage</th>
+        </tr>
+       </thead>
+       <tbody>
+       <tr><td><a href="ComercialItensRepository.php.html#17"><abbr title="App\Repository\ComercialItensRepository::__construct">__construct</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="TribNCMRepository.php.html#33"><abbr title="App\Repository\TribNCMRepository::fetch">fetch</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="QuizQuestionsRepository.php.html#17"><abbr title="App\Repository\QuizQuestionsRepository::__construct">__construct</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="QuizRepository.php.html#17"><abbr title="App\Repository\QuizRepository::__construct">__construct</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="TribCFOPRepository.php.html#21"><abbr title="App\Repository\TribCFOPRepository::__construct">__construct</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="TribCFOPRepository.php.html#33"><abbr title="App\Repository\TribCFOPRepository::fetch">fetch</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="TribCFOPRepository.php.html#63"><abbr title="App\Repository\TribCFOPRepository::createWhere">createWhere</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="TribCSTRepository.php.html#21"><abbr title="App\Repository\TribCSTRepository::__construct">__construct</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="TribCSTRepository.php.html#33"><abbr title="App\Repository\TribCSTRepository::fetch">fetch</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="TribCSTRepository.php.html#63"><abbr title="App\Repository\TribCSTRepository::createWhere">createWhere</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="TribNCMRepository.php.html#21"><abbr title="App\Repository\TribNCMRepository::__construct">__construct</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="TribNCMRepository.php.html#63"><abbr title="App\Repository\TribNCMRepository::createWhere">createWhere</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="QuestionsOPTRepository.php.html#17"><abbr title="App\Repository\QuestionsOPTRepository::__construct">__construct</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="TribTipoOperacaoRepository.php.html#21"><abbr title="App\Repository\TribTipoOperacaoRepository::__construct">__construct</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="TribTipoOperacaoRepository.php.html#32"><abbr title="App\Repository\TribTipoOperacaoRepository::fetch">fetch</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="TribTipoOperacaoRepository.php.html#58"><abbr title="App\Repository\TribTipoOperacaoRepository::createWhere">createWhere</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="UserRepository.php.html#25"><abbr title="App\Repository\UserRepository::__construct">__construct</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="UserRepository.php.html#33"><abbr title="App\Repository\UserRepository::upgradePassword">upgradePassword</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="UserRepository.php.html#50"><abbr title="App\Repository\UserRepository::fetch">fetch</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="UserRepository.php.html#81"><abbr title="App\Repository\UserRepository::createWhere">createWhere</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="UserRepository.php.html#99"><abbr title="App\Repository\UserRepository::login">login</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="UserTokensRepository.php.html#19"><abbr title="App\Repository\UserTokensRepository::__construct">__construct</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="QuestionsRepository.php.html#17"><abbr title="App\Repository\QuestionsRepository::__construct">__construct</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ProdutoRepository.php.html#63"><abbr title="App\Repository\ProdutoRepository::createWhere">createWhere</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ComercialRepository.php.html#21"><abbr title="App\Repository\ComercialRepository::__construct">__construct</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="FilialRepository.php.html#75"><abbr title="App\Repository\FilialRepository::createWhere">createWhere</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ComercialRepository.php.html#32"><abbr title="App\Repository\ComercialRepository::fetch">fetch</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ComercialRepository.php.html#58"><abbr title="App\Repository\ComercialRepository::createWhere">createWhere</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="DisciplinaRepository.php.html#17"><abbr title="App\Repository\DisciplinaRepository::__construct">__construct</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="FamiliaProdutoRepository.php.html#21"><abbr title="App\Repository\FamiliaProdutoRepository::__construct">__construct</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="FamiliaProdutoRepository.php.html#33"><abbr title="App\Repository\FamiliaProdutoRepository::fetch">fetch</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="FamiliaProdutoRepository.php.html#63"><abbr title="App\Repository\FamiliaProdutoRepository::createWhere">createWhere</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="FilialRepository.php.html#22"><abbr title="App\Repository\FilialRepository::__construct">__construct</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="FilialRepository.php.html#31"><abbr title="App\Repository\FilialRepository::loadLoggedFilial">loadLoggedFilial</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="FilialRepository.php.html#51"><abbr title="App\Repository\FilialRepository::fetch">fetch</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="GrupoUsuariosRepository.php.html#21"><abbr title="App\Repository\GrupoUsuariosRepository::__construct">__construct</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ProdutoRepository.php.html#33"><abbr title="App\Repository\ProdutoRepository::fetch">fetch</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="GrupoUsuariosRepository.php.html#33"><abbr title="App\Repository\GrupoUsuariosRepository::fetch">fetch</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="GrupoUsuariosRepository.php.html#56"><abbr title="App\Repository\GrupoUsuariosRepository::createWhere">createWhere</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="PermissoesRepository.php.html#17"><abbr title="App\Repository\PermissoesRepository::__construct">__construct</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="PessoaContatoRepository.php.html#17"><abbr title="App\Repository\PessoaContatoRepository::__construct">__construct</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="PessoaEnderecoRepository.php.html#17"><abbr title="App\Repository\PessoaEnderecoRepository::__construct">__construct</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="PessoaRepository.php.html#22"><abbr title="App\Repository\PessoaRepository::__construct">__construct</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="PessoaRepository.php.html#33"><abbr title="App\Repository\PessoaRepository::fetch">fetch</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="PessoaRepository.php.html#62"><abbr title="App\Repository\PessoaRepository::createWhere">createWhere</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ProdutoRepository.php.html#21"><abbr title="App\Repository\ProdutoRepository::__construct">__construct</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="UserTokensRepository.php.html#31"><abbr title="App\Repository\UserTokensRepository::getUserAuthenticated">getUserAuthenticated</abbr></a></td><td class="text-right">0%</td></tr>
+
+       </tbody>
+      </table>
+     </div>
+    </div>
+    <div class="col-md-6">
+     <h3>Project Risks</h3>
+     <div class="scrollbox">
+      <table class="table">
+       <thead>
+        <tr>
+         <th>Method</th>
+         <th class="text-right"><abbr title="Change Risk Anti-Patterns (CRAP) Index">CRAP</abbr></th>
+        </tr>
+       </thead>
+       <tbody>
+       <tr><td><a href="PessoaRepository.php.html#62"><abbr title="App\Repository\PessoaRepository::createWhere">createWhere</abbr></a></td><td class="text-right">240</td></tr>
+       <tr><td><a href="TribCSTRepository.php.html#63"><abbr title="App\Repository\TribCSTRepository::createWhere">createWhere</abbr></a></td><td class="text-right">30</td></tr>
+       <tr><td><a href="TribCFOPRepository.php.html#33"><abbr title="App\Repository\TribCFOPRepository::fetch">fetch</abbr></a></td><td class="text-right">20</td></tr>
+       <tr><td><a href="FamiliaProdutoRepository.php.html#33"><abbr title="App\Repository\FamiliaProdutoRepository::fetch">fetch</abbr></a></td><td class="text-right">20</td></tr>
+       <tr><td><a href="TribNCMRepository.php.html#33"><abbr title="App\Repository\TribNCMRepository::fetch">fetch</abbr></a></td><td class="text-right">20</td></tr>
+       <tr><td><a href="ProdutoRepository.php.html#33"><abbr title="App\Repository\ProdutoRepository::fetch">fetch</abbr></a></td><td class="text-right">20</td></tr>
+       <tr><td><a href="TribCSTRepository.php.html#33"><abbr title="App\Repository\TribCSTRepository::fetch">fetch</abbr></a></td><td class="text-right">20</td></tr>
+       <tr><td><a href="TribTipoOperacaoRepository.php.html#58"><abbr title="App\Repository\TribTipoOperacaoRepository::createWhere">createWhere</abbr></a></td><td class="text-right">12</td></tr>
+       <tr><td><a href="UserRepository.php.html#81"><abbr title="App\Repository\UserRepository::createWhere">createWhere</abbr></a></td><td class="text-right">12</td></tr>
+       <tr><td><a href="ProdutoRepository.php.html#63"><abbr title="App\Repository\ProdutoRepository::createWhere">createWhere</abbr></a></td><td class="text-right">12</td></tr>
+       <tr><td><a href="PessoaRepository.php.html#33"><abbr title="App\Repository\PessoaRepository::fetch">fetch</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="GrupoUsuariosRepository.php.html#33"><abbr title="App\Repository\GrupoUsuariosRepository::fetch">fetch</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="TribTipoOperacaoRepository.php.html#32"><abbr title="App\Repository\TribTipoOperacaoRepository::fetch">fetch</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="FilialRepository.php.html#51"><abbr title="App\Repository\FilialRepository::fetch">fetch</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="UserRepository.php.html#33"><abbr title="App\Repository\UserRepository::upgradePassword">upgradePassword</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="UserRepository.php.html#50"><abbr title="App\Repository\UserRepository::fetch">fetch</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="ComercialRepository.php.html#32"><abbr title="App\Repository\ComercialRepository::fetch">fetch</abbr></a></td><td class="text-right">6</td></tr>
+
+       </tbody>
+      </table>
+     </div>
+    </div>
+   </div>
+   <footer>
+    <hr/>
+    <p>
+     <small>Generated by <a href="https://github.com/sebastianbergmann/php-code-coverage" target="_top">php-code-coverage 6.1.4</a> using <a href="https://secure.php.net/" target="_top">PHP 7.4.19</a> with <a href="https://xdebug.org/">Xdebug 3.0.4</a> and <a href="https://phpunit.de/">PHPUnit 7.5.20</a> at Fri Jun 18 19:49:17 UTC 2021.</small>
+    </p>
+   </footer>
+  </div>
+  <script src="../.js/jquery.min.js" type="text/javascript"></script>
+  <script src="../.js/d3.min.js" type="text/javascript"></script>
+  <script src="../.js/nv.d3.min.js" type="text/javascript"></script>
+  <script type="text/javascript">
+$(document).ready(function() {
+  nv.addGraph(function() {
+    var chart = nv.models.multiBarChart();
+    chart.tooltips(false)
+      .showControls(false)
+      .showLegend(false)
+      .reduceXTicks(false)
+      .staggerLabels(true)
+      .yAxis.tickFormat(d3.format('d'));
+
+    d3.select('#classCoverageDistribution svg')
+      .datum(getCoverageDistributionData([21,0,0,0,0,0,0,0,0,0,0,0], "Class Coverage"))
+      .transition().duration(500).call(chart);
+
+    nv.utils.windowResize(chart.update);
+
+    return chart;
+  });
+
+  nv.addGraph(function() {
+    var chart = nv.models.multiBarChart();
+    chart.tooltips(false)
+      .showControls(false)
+      .showLegend(false)
+      .reduceXTicks(false)
+      .staggerLabels(true)
+      .yAxis.tickFormat(d3.format('d'));
+
+    d3.select('#methodCoverageDistribution svg')
+      .datum(getCoverageDistributionData([47,0,0,0,0,0,0,0,0,0,0,0], "Method Coverage"))
+      .transition().duration(500).call(chart);
+
+    nv.utils.windowResize(chart.update);
+
+    return chart;
+  });
+
+  function getCoverageDistributionData(data, label) {
+    var labels = [
+      '0%',
+      '0-10%',
+      '10-20%',
+      '20-30%',
+      '30-40%',
+      '40-50%',
+      '50-60%',
+      '60-70%',
+      '70-80%',
+      '80-90%',
+      '90-100%',
+      '100%'
+    ];
+    var values = [];
+    $.each(labels, function(key) {
+      values.push({x: labels[key], y: data[key]});
+    });
+
+    return [
+      {
+        key: label,
+        values: values,
+        color: "#4572A7"
+      }
+    ];
+  }
+  nv.addGraph(function() {
+    var chart = nv.models.scatterChart()
+      .showDistX(true)
+      .showDistY(true)
+      .showLegend(false)
+      .forceX([0, 100]);
+    chart.tooltipContent(function(graph) {
+      return '<p>' + graph.point.class + '</p>';
+    });
+
+    chart.xAxis.axisLabel('Code Coverage (in percent)');
+    chart.yAxis.axisLabel('Cyclomatic Complexity');
+
+    d3.select('#classComplexity svg')
+      .datum(getComplexityData([[0,1,"<a href=\"ComercialItensRepository.php.html#15\">App\\Repository\\ComercialItensRepository<\/a>"],[0,4,"<a href=\"ComercialRepository.php.html#19\">App\\Repository\\ComercialRepository<\/a>"],[0,1,"<a href=\"DisciplinaRepository.php.html#15\">App\\Repository\\DisciplinaRepository<\/a>"],[0,6,"<a href=\"FamiliaProdutoRepository.php.html#19\">App\\Repository\\FamiliaProdutoRepository<\/a>"],[0,5,"<a href=\"FilialRepository.php.html#20\">App\\Repository\\FilialRepository<\/a>"],[0,4,"<a href=\"GrupoUsuariosRepository.php.html#19\">App\\Repository\\GrupoUsuariosRepository<\/a>"],[0,1,"<a href=\"PermissoesRepository.php.html#15\">App\\Repository\\PermissoesRepository<\/a>"],[0,1,"<a href=\"PessoaContatoRepository.php.html#15\">App\\Repository\\PessoaContatoRepository<\/a>"],[0,1,"<a href=\"PessoaEnderecoRepository.php.html#15\">App\\Repository\\PessoaEnderecoRepository<\/a>"],[0,18,"<a href=\"PessoaRepository.php.html#20\">App\\Repository\\PessoaRepository<\/a>"],[0,8,"<a href=\"ProdutoRepository.php.html#19\">App\\Repository\\ProdutoRepository<\/a>"],[0,1,"<a href=\"QuestionsOPTRepository.php.html#15\">App\\Repository\\QuestionsOPTRepository<\/a>"],[0,1,"<a href=\"QuestionsRepository.php.html#15\">App\\Repository\\QuestionsRepository<\/a>"],[0,1,"<a href=\"QuizQuestionsRepository.php.html#15\">App\\Repository\\QuizQuestionsRepository<\/a>"],[0,1,"<a href=\"QuizRepository.php.html#15\">App\\Repository\\QuizRepository<\/a>"],[0,6,"<a href=\"TribCFOPRepository.php.html#19\">App\\Repository\\TribCFOPRepository<\/a>"],[0,10,"<a href=\"TribCSTRepository.php.html#19\">App\\Repository\\TribCSTRepository<\/a>"],[0,6,"<a href=\"TribNCMRepository.php.html#19\">App\\Repository\\TribNCMRepository<\/a>"],[0,6,"<a href=\"TribTipoOperacaoRepository.php.html#19\">App\\Repository\\TribTipoOperacaoRepository<\/a>"],[0,9,"<a href=\"UserRepository.php.html#23\">App\\Repository\\UserRepository<\/a>"],[0,2,"<a href=\"UserTokensRepository.php.html#17\">App\\Repository\\UserTokensRepository<\/a>"]], 'Class Complexity'))
+      .transition()
+      .duration(500)
+      .call(chart);
+
+    nv.utils.windowResize(chart.update);
+
+    return chart;
+  });
+
+  nv.addGraph(function() {
+    var chart = nv.models.scatterChart()
+      .showDistX(true)
+      .showDistY(true)
+      .showLegend(false)
+      .forceX([0, 100]);
+    chart.tooltipContent(function(graph) {
+      return '<p>' + graph.point.class + '</p>';
+    });
+
+    chart.xAxis.axisLabel('Code Coverage (in percent)');
+    chart.yAxis.axisLabel('Method Complexity');
+
+    d3.select('#methodComplexity svg')
+      .datum(getComplexityData([[0,1,"<a href=\"ComercialItensRepository.php.html#17\">App\\Repository\\ComercialItensRepository::__construct<\/a>"],[0,1,"<a href=\"ComercialRepository.php.html#21\">App\\Repository\\ComercialRepository::__construct<\/a>"],[0,2,"<a href=\"ComercialRepository.php.html#32\">App\\Repository\\ComercialRepository::fetch<\/a>"],[0,1,"<a href=\"ComercialRepository.php.html#58\">App\\Repository\\ComercialRepository::createWhere<\/a>"],[0,1,"<a href=\"DisciplinaRepository.php.html#17\">App\\Repository\\DisciplinaRepository::__construct<\/a>"],[0,1,"<a href=\"FamiliaProdutoRepository.php.html#21\">App\\Repository\\FamiliaProdutoRepository::__construct<\/a>"],[0,4,"<a href=\"FamiliaProdutoRepository.php.html#33\">App\\Repository\\FamiliaProdutoRepository::fetch<\/a>"],[0,1,"<a href=\"FamiliaProdutoRepository.php.html#63\">App\\Repository\\FamiliaProdutoRepository::createWhere<\/a>"],[0,1,"<a href=\"FilialRepository.php.html#22\">App\\Repository\\FilialRepository::__construct<\/a>"],[0,1,"<a href=\"FilialRepository.php.html#31\">App\\Repository\\FilialRepository::loadLoggedFilial<\/a>"],[0,2,"<a href=\"FilialRepository.php.html#51\">App\\Repository\\FilialRepository::fetch<\/a>"],[0,1,"<a href=\"FilialRepository.php.html#75\">App\\Repository\\FilialRepository::createWhere<\/a>"],[0,1,"<a href=\"GrupoUsuariosRepository.php.html#21\">App\\Repository\\GrupoUsuariosRepository::__construct<\/a>"],[0,2,"<a href=\"GrupoUsuariosRepository.php.html#33\">App\\Repository\\GrupoUsuariosRepository::fetch<\/a>"],[0,1,"<a href=\"GrupoUsuariosRepository.php.html#56\">App\\Repository\\GrupoUsuariosRepository::createWhere<\/a>"],[0,1,"<a href=\"PermissoesRepository.php.html#17\">App\\Repository\\PermissoesRepository::__construct<\/a>"],[0,1,"<a href=\"PessoaContatoRepository.php.html#17\">App\\Repository\\PessoaContatoRepository::__construct<\/a>"],[0,1,"<a href=\"PessoaEnderecoRepository.php.html#17\">App\\Repository\\PessoaEnderecoRepository::__construct<\/a>"],[0,1,"<a href=\"PessoaRepository.php.html#22\">App\\Repository\\PessoaRepository::__construct<\/a>"],[0,2,"<a href=\"PessoaRepository.php.html#33\">App\\Repository\\PessoaRepository::fetch<\/a>"],[0,15,"<a href=\"PessoaRepository.php.html#62\">App\\Repository\\PessoaRepository::createWhere<\/a>"],[0,1,"<a href=\"ProdutoRepository.php.html#21\">App\\Repository\\ProdutoRepository::__construct<\/a>"],[0,4,"<a href=\"ProdutoRepository.php.html#33\">App\\Repository\\ProdutoRepository::fetch<\/a>"],[0,3,"<a href=\"ProdutoRepository.php.html#63\">App\\Repository\\ProdutoRepository::createWhere<\/a>"],[0,1,"<a href=\"QuestionsOPTRepository.php.html#17\">App\\Repository\\QuestionsOPTRepository::__construct<\/a>"],[0,1,"<a href=\"QuestionsRepository.php.html#17\">App\\Repository\\QuestionsRepository::__construct<\/a>"],[0,1,"<a href=\"QuizQuestionsRepository.php.html#17\">App\\Repository\\QuizQuestionsRepository::__construct<\/a>"],[0,1,"<a href=\"QuizRepository.php.html#17\">App\\Repository\\QuizRepository::__construct<\/a>"],[0,1,"<a href=\"TribCFOPRepository.php.html#21\">App\\Repository\\TribCFOPRepository::__construct<\/a>"],[0,4,"<a href=\"TribCFOPRepository.php.html#33\">App\\Repository\\TribCFOPRepository::fetch<\/a>"],[0,1,"<a href=\"TribCFOPRepository.php.html#63\">App\\Repository\\TribCFOPRepository::createWhere<\/a>"],[0,1,"<a href=\"TribCSTRepository.php.html#21\">App\\Repository\\TribCSTRepository::__construct<\/a>"],[0,4,"<a href=\"TribCSTRepository.php.html#33\">App\\Repository\\TribCSTRepository::fetch<\/a>"],[0,5,"<a href=\"TribCSTRepository.php.html#63\">App\\Repository\\TribCSTRepository::createWhere<\/a>"],[0,1,"<a href=\"TribNCMRepository.php.html#21\">App\\Repository\\TribNCMRepository::__construct<\/a>"],[0,4,"<a href=\"TribNCMRepository.php.html#33\">App\\Repository\\TribNCMRepository::fetch<\/a>"],[0,1,"<a href=\"TribNCMRepository.php.html#63\">App\\Repository\\TribNCMRepository::createWhere<\/a>"],[0,1,"<a href=\"TribTipoOperacaoRepository.php.html#21\">App\\Repository\\TribTipoOperacaoRepository::__construct<\/a>"],[0,2,"<a href=\"TribTipoOperacaoRepository.php.html#32\">App\\Repository\\TribTipoOperacaoRepository::fetch<\/a>"],[0,3,"<a href=\"TribTipoOperacaoRepository.php.html#58\">App\\Repository\\TribTipoOperacaoRepository::createWhere<\/a>"],[0,1,"<a href=\"UserRepository.php.html#25\">App\\Repository\\UserRepository::__construct<\/a>"],[0,2,"<a href=\"UserRepository.php.html#33\">App\\Repository\\UserRepository::upgradePassword<\/a>"],[0,2,"<a href=\"UserRepository.php.html#50\">App\\Repository\\UserRepository::fetch<\/a>"],[0,3,"<a href=\"UserRepository.php.html#81\">App\\Repository\\UserRepository::createWhere<\/a>"],[0,1,"<a href=\"UserRepository.php.html#99\">App\\Repository\\UserRepository::login<\/a>"],[0,1,"<a href=\"UserTokensRepository.php.html#19\">App\\Repository\\UserTokensRepository::__construct<\/a>"],[0,1,"<a href=\"UserTokensRepository.php.html#31\">App\\Repository\\UserTokensRepository::getUserAuthenticated<\/a>"]], 'Method Complexity'))
+      .transition()
+      .duration(500)
+      .call(chart);
+
+    nv.utils.windowResize(chart.update);
+
+    return chart;
+  });
+
+  function getComplexityData(data, label) {
+    var values = [];
+    $.each(data, function(key) {
+      var value = Math.round(data[key][0]*100) / 100;
+      values.push({
+        x: value,
+        y: data[key][1],
+        class: data[key][2],
+        size: 0.05,
+        shape: 'diamond'
+      });
+    });
+
+    return [
+      {
+        key: label,
+        values: values,
+        color: "#4572A7"
+      }
+    ];
+  }
+});
+  </script>
+ </body>
+</html>

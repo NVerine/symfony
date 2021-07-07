@@ -10,6 +10,7 @@ use App\Repository\PessoaRepository;
 use App\Service\Notify;
 use App\Traits\Response;
 use App\Util\ValueHelper;
+use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\NonUniqueResultException;
 use Exception;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -66,18 +67,6 @@ class PessoaController extends ControllerController
      */
     public function index(Request $request): JsonResponse
     {
-//        $items = $this->repository->fetch($request);
-//        dump($items);
-//        return $this->notifyReturn(
-//            parent::serialize(
-//                [
-////                    "headers" => self::$headers,
-//                    "items" => $items
-//                ],
-////                ["pessoa_default", "pessoaendereco_default", "pessoacontato_default", "pessoa_index"]
-//            )
-//        );
-
         return $this->response(
             $this->repository->fetch($request),
             self::$headers,
@@ -106,7 +95,7 @@ class PessoaController extends ControllerController
             $temp[] = $arr;
         }
 
-        return JsonResponse::create(
+        return new JsonResponse(
             $temp,
             200,
             array('Symfony-Debug-Toolbar-Replace' => 1)
@@ -128,18 +117,18 @@ class PessoaController extends ControllerController
     }
 
     /**
-     * @Route("/{id}/edit", name="api_pessoa_edit", methods={"GET","POST"})
+     * @Route("/{id}/edit", name="api_pessoa_edit", methods={"POST"})
      * @param $id
      * @param ValidatorInterface $validator
      * @param Request $request
      * @return JsonResponse
      * @throws Exception
      */
-    public function edit($id, ValidatorInterface $validator, Request $request): JsonResponse
+    public function edit($id, ValidatorInterface $validator, Request $request, EntityManager $entityManager): JsonResponse
     {
         $conteudo = json_decode($request->getContent(), true);
 
-        $entityManager = $this->getDoctrine()->getManager();
+//        $entityManager = $this->getDoctrine()->getManager();
 
         if ($id > 0) {
             $pessoa = $this->getDoctrine()
