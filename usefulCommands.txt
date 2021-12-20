@@ -1,0 +1,25 @@
+Open container:
+$ docker exec -it name bash
+
+#Inside symfony container:
+
+Create database
+$ php bin/console doctrine:database:create
+
+Create migration
+$ php bin/console doctrine:migrations:diff
+
+Run migrations
+$ php bin/console doctrine:migrations:migrate
+
+Run fixtures
+$ php bin/console doctrine:fixtures:load --append
+
+Show services list
+$ php bin/console debug:container
+
+Show route list
+$ php bin/console debug:router
+
+Clear cache
+$ php bin/console cache:pool:clear cache.global_clearer

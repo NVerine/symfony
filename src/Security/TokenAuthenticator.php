@@ -2,7 +2,7 @@
 
 namespace App\Security;
 
-use App\Entity\Filial;
+use App\Entity\Branch;
 use App\Entity\User;
 use App\Entity\UserTokens;
 use Doctrine\ORM\EntityManagerInterface;
@@ -58,7 +58,7 @@ class TokenAuthenticator extends AbstractGuardAuthenticator
     public function getUser($credentials, UserProviderInterface $userProvider)
     {
         //todo trocar filial de acordo com a filial ativa no usuario
-        $filial = $this->em->getRepository(Filial::class)->loadLoggedFilial(1);
+        $filial = $this->em->getRepository(Branch::class)->loadLoggedFilial(1);
         $this->session->set('filial', $filial);
 
         $request = $credentials;

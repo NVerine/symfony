@@ -51,10 +51,9 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
     {
         $qb = $this->createQueryBuilder('tb')
             ->select('tb', 'ps', 'gp', 'fl')
-            ->leftJoin('tb.grupo', 'gp')
-            ->leftJoin('tb.pessoa', 'ps')
-            ->leftJoin('tb.filiais', 'fl');
-//            ->leftJoin('tb.contatoPrincipal', 'contatoPrincipal');
+            ->leftJoin('tb.group', 'gp')
+            ->leftJoin('tb.person', 'ps')
+            ->leftJoin('tb.branchs', 'fl');
 
         if(!is_null($id)) {
             return $qb//->addSelect('endereco', 'contato')
@@ -95,16 +94,17 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
     /**
      * @param string $username
      * @return array|null
+     * @throws NonUniqueResultException
      */
     public function login(string $username){
-        $qb = $this->createQueryBuilder('tb')
+        return $this->createQueryBuilder('tb')
             ->select('tb', 'ps', 'gp', 'fl')
-            ->leftJoin('tb.grupo', 'gp')
-            ->leftJoin('tb.pessoa', 'ps')
-            ->leftJoin('tb.filiais', 'fl')
-            ->andWhere('tb.username = :username')
-            ->setParameter('username', $username);
-
-        return SQLHelper::getResultsOrNull($qb);
+            ->leftJoin('tb.group', 'gp')
+            ->leftJoin('tb.person', 'ps')
+            ->leftJoin('tb.branchs', 'fl')
+            ->andWhere('LOWER(tb.username) = :username')
+            ->setParameter('username', strtolower($username))
+            ->getQuery()
+            ->getOneOrNullResult();
     }
 }

@@ -1,0 +1,22 @@
+api_branch_index:
+  path: /
+  controller: App\Controller\Api\BranchController::index
+  methods: [GET]
+
+api_branch_show:
+  path: /{id}
+  controller: App\Controller\Api\BranchController::show
+  methods: [GET]
+
+api_branch_edit:
+  path: /{id}/edit
+  controller: App\Controller\Api\BranchController::edit
+  methods: [ GET, POST ]
+
+api_branch_list:
+  path: /list
+  controller: App\Controller\Api\BranchController::list
+  methods: [GET]
+
+
+

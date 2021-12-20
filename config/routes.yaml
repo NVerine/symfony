@@ -4,3 +4,30 @@
 
 #api_logout:
 #  path: /logout
+
+api_permissions:
+  prefix: /api/permissions
+  resource: 'routes/permissions.yaml'
+
+api_branch:
+  prefix: /api/branch
+  resource: 'routes/branch.yaml'
+
+api_person:
+  prefix: /api/person
+  resource: 'routes/person.yaml'
+
+api_user:
+  prefix: /api/user
+  resource: 'routes/user.yaml'
+
+_app_login:
+  path: /login
+  controller: App\Controller\Api\AuthController::login
+  methods: [ POST ]
+
+_app_logoff:
+  path: /logoff
+  controller: App\Controller\Api\AuthController::logoff
+  methods: [ POST ]
+

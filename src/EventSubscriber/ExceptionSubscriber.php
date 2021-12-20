@@ -16,6 +16,7 @@ class ExceptionSubscriber implements EventSubscriberInterface
     {
         $this->notify = $notify;
     }
+
     public static function getSubscribedEvents()
     {
         return array(
@@ -29,16 +30,37 @@ class ExceptionSubscriber implements EventSubscriberInterface
         $files = $exception->getTrace();
 
         $trace = "";
-        foreach ($files as $r){
-            if (strpos($r["file"], '/src/') !== false) {
-                $f = explode("/src/", $r["file"]);
-                $trace .= $f[1]."::".$r["line"]."<br>";
+        $i = 0;
+        foreach ($files as $r) {
+            if ($i == 0 && $exception->getFile() != $r["file"]) {
+                $f = explode("/src/", $exception->getFile());
+                if (count($f) <= 1){
+                    $f = explode("/vendor/", $exception->getFile());
+                    $trace .= "- " . $f[1] . "::" . $exception->getLine();
+                }
+                else{
+                    $trace .= "- " . $f[1] . "::" . $exception->getLine();
+                }
             }
+            if (str_contains($r["file"], '/src/')) {
+                $f = explode("/src/", $r["file"]);
+                if (!empty($trace))
+                    $trace .= " <br>";
+                $trace .= "- " . $f[1] . "::" . $r["line"];
+            }
+            $i++;
         }
 
-        $message = $trace." ".$exception->getMessage();
+        $trace = $exception->getMessage() . " <br><br> " . $trace;
 
-        $this->notify->addMessage($this->notify::TIPO_ERROR, $message);
+        if (empty($trace)) {
+            $f = explode("/symfony/", $exception->getFile());
+            $file = $f[1] . "::" . $exception->getLine() . "<br>";
+
+            $trace = $file . $exception->getMessage();
+        }
+
+        $this->notify->addMessage($this->notify::ERROR, $trace);
         $customResponse = JsonResponse::fromJsonString(
             $this->notify->newReturn(""), 200,
             array('Symfony-Debug-Toolbar-Replace' => 1)

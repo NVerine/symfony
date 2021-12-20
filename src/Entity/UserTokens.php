@@ -18,35 +18,35 @@ class UserTokens
     private $id;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="string", length=255, nullable=false)
      */
-    private $origin;
+    private string $origin;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="string", length=255, nullable=false)
      */
-    private $user_agent;
+    private string $user_agent;
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(type="datetime", nullable=false)
      */
-    private $data;
+    private \DateTimeInterface $date;
 
     /**
      * @ORM\ManyToOne(targetEntity=User::class, inversedBy="userTokens")
      * @ORM\JoinColumn(nullable=false)
      */
-    private $user;
+    private User $user;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="string", length=255, nullable=false)
      */
-    private $token;
+    private string $token;
 
     /**
-     * @ORM\Column(type="boolean")
+     * @ORM\Column(type="boolean", nullable=false)
      */
-    private $isActive;
+    private bool $isActive;
 
     public function getId(): ?int
     {
@@ -61,7 +61,6 @@ class UserTokens
     public function setOrigin(string $origin): self
     {
         $this->origin = $origin;
-
         return $this;
     }
 
@@ -73,19 +72,17 @@ class UserTokens
     public function setUserAgent(string $user_agent): self
     {
         $this->user_agent = $user_agent;
-
         return $this;
     }
 
-    public function getData(): ?\DateTimeInterface
+    public function getDate(): ?\DateTimeInterface
     {
-        return $this->data;
+        return $this->date;
     }
 
-    public function setData(\DateTimeInterface $data): self
+    public function setDate(\DateTimeInterface $date): self
     {
-        $this->data = $data;
-
+        $this->date = $date;
         return $this;
     }
 
@@ -94,10 +91,9 @@ class UserTokens
         return $this->user;
     }
 
-    public function setUser(?User $user): self
+    public function setUser(User $user): self
     {
         $this->user = $user;
-
         return $this;
     }
 
@@ -109,7 +105,6 @@ class UserTokens
     public function setToken(string $token): self
     {
         $this->token = $token;
-
         return $this;
     }
 
@@ -121,7 +116,6 @@ class UserTokens
     public function setIsActive(bool $isActive): self
     {
         $this->isActive = $isActive;
-
         return $this;
     }
 }

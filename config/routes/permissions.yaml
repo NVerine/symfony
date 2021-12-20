@@ -1,0 +1,33 @@
+api_permissions_index:
+  path: /
+  controller: App\Controller\Api\PermissionsController::index
+  methods: [GET]
+
+api_permissions_show:
+  path: /{id}
+  controller: App\Controller\Api\PermissionsController::show
+  methods: [GET]
+  requirements:
+    id: '\d+'
+
+api_permissoes_edit:
+  path: /{id}/edit
+  controller: App\Controller\Api\PermissionsController::edit
+  methods: [ GET, POST ]
+
+_permissions_list:
+  path: /list
+  controller: App\Controller\Api\PermissionsController::listPermissions
+  methods: [GET]
+
+_permissions_current:
+  path: /current
+  controller: App\Controller\Api\PermissionsController::getCurrentPermissions
+  methods: [GET]
+
+_permissions_list_routes:
+  path: /routes
+  controller: App\Controller\Api\PermissionsController::listRoutes
+  methods: [GET]
+
+
