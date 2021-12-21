@@ -4,8 +4,9 @@ namespace App\Repository;
 
 use App\Entity\Permissions;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
-use Symfony\Component\HttpFoundation\Request;
+use Exception;
 use Symfony\Component\Routing\Route;
 
 /**
@@ -14,7 +15,7 @@ use Symfony\Component\Routing\Route;
  * @method Permissions[]    findAll()
  * @method Permissions[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class PermissionsRepository extends ServiceEntityRepository
+class PermissionsRepository extends ServiceEntityRepository implements CustomRepository
 {
     public static $blocked_routes = [
         "api_comercial_index", "api_comercial_show", "api_comercial_edit",
@@ -53,15 +54,13 @@ class PermissionsRepository extends ServiceEntityRepository
         return $routes;
     }
 
-    public function clean($group)
+    public function getOne($id, array $request = null)
     {
-        if (!$group > 0) {
-            //erro
-        }
-        $permissions = $this->findBy(array('grupo' => $group));
+        // TODO: Implement getOne() method.
+    }
 
-        foreach ($permissions as $p) {
-            $this->remove($p);
-        }
+    public function createWhere(array $request, QueryBuilder &$qb): void
+    {
+        // TODO: Implement createWhere() method.
     }
 }

@@ -33,6 +33,8 @@ class UsersGroup
      */
     private $permissions;
 
+    private $routes;
+
     public function __construct()
     {
         $this->users = new ArrayCollection();
@@ -110,4 +112,15 @@ class UsersGroup
 
         return $this;
     }
+
+    public function getRoutes()
+    {
+        return $this->routes;
+    }
+
+    public function setRoutes($routes): void
+    {
+        $this->routes = $routes;
+    }
+
 }

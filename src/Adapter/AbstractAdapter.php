@@ -21,11 +21,6 @@ abstract class AbstractAdapter implements AdapterInterface
     protected EntityManagerInterface $em;
 
     /**
-     * @var string
-     */
-    protected string $defaultEntity;
-
-    /**
      * @var null|ContainerInterface
      */
     protected ?ContainerInterface $container;
@@ -49,6 +44,8 @@ abstract class AbstractAdapter implements AdapterInterface
         $this->notify = $this->container->get('notify');
     }
 
+    abstract function fetch(?array $data, $id = null);
+
     /**
      * @return User|null
      */
@@ -62,18 +59,6 @@ abstract class AbstractAdapter implements AdapterInterface
             return null;
         }
         return $user;
-    }
-
-    /**
-     * @param array|null $data
-     * @param null $id
-     * @return mixed
-     */
-    public function fetch(?array $data, $id = null)
-    {
-        if (!empty($this->defaultEntity)) {
-            return $this->em->getRepository($this->defaultEntity)->fetch($data, $id);
-        }
     }
 
     /**

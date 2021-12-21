@@ -218,4 +218,9 @@ class UserAdapter extends AbstractAdapter
 
         return "success";
     }
+
+    function fetch(?array $data, $id = null)
+    {
+        // TODO: Implement fetch() method.
+    }
 }

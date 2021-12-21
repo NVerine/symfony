@@ -45,7 +45,7 @@ abstract class ApiController implements ApiInterface
      */
     public function show($id, Request $request): JsonResponse
     {
-        $data = json_decode($request->getContent(), true);
+        $data = $request->query->all();
         return $this->response($this->adapter->fetch($data, $id));
     }
 

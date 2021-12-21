@@ -23,11 +23,10 @@ class PermissionsController extends ApiController
     /**
      * @param Request $request
      * @return JsonResponse
-     * @throws ExceptionInterface
      */
     public function index(Request $request): JsonResponse
     {
-        $data = json_decode($request->getContent(), true);
+        $data = $request->query->all();
         return $this->response($this->adapter->getUsersGroup($data));
     }
 
@@ -35,18 +34,16 @@ class PermissionsController extends ApiController
      * @param $id
      * @param Request $request
      * @return JsonResponse
-     * @throws ExceptionInterface
      */
     public function show($id, Request $request): JsonResponse
     {
-        $data = json_decode($request->getContent(), true);
+        $data = $request->query->all();
         return $this->response($this->adapter->getUsersGroup($data, $id));
     }
 
     /**
      * @param Request $request
      * @return JsonResponse
-     * @throws ExceptionInterface
      */
     public function listPermissions(Request $request): JsonResponse
     {
@@ -80,6 +77,12 @@ class PermissionsController extends ApiController
     public function edit($id, Request $request): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
-        return $this->response($this->adapter->save($id, $data));
+        $fallback = $this->adapter->save($id, $data);
+
+        if($fallback){
+            $notify = $this->container->get('notify');
+            $notify->addMessage($notify::SUCCESS, "Success! Permissions saved");
+        }
+        return $this->response($fallback);
     }
 }

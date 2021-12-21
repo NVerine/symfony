@@ -6,6 +6,7 @@ use App\Entity\UsersGroup;
 use App\Entity\Permissions;
 use App\Entity\View\PermissionsView;
 use Exception;
+use Symfony\Component\Serializer\Exception\ExceptionInterface;
 
 class PermissionsAdapter extends AbstractAdapter
 {
@@ -14,17 +15,22 @@ class PermissionsAdapter extends AbstractAdapter
      * @param array|null $data
      * @param int|null $id
      * @return array
+     * @throws ExceptionInterface
      */
     public function getUsersGroup(?array $data, ?int $id = null)
     {
-        $data = $this->em->getRepository(PermissionsView::class)->fetch($data, $id);
+        // return the normal content
+        if($id !== null){
+            $data = $this->em->getRepository(UsersGroup::class)->getOne($id, $data);
+            $data[0]->setRoutes($this->mountRoutes());
+            return $data;
+        }
+
+        $data = $this->em->getRepository(PermissionsView::class)->fetch($data);
         return $this->setColumnsOrder("permissions", $data);
     }
 
-    /**
-     * @return mixed
-     */
-    public function mountRoutes(): mixed
+    public function mountRoutes()
     {
         return $this->em->getRepository(Permissions::class)->mountRoutes($this->container->get('router'));
     }
@@ -32,43 +38,44 @@ class PermissionsAdapter extends AbstractAdapter
     /**
      * @param $id
      * @param $data
-     * @return mixed
      * @throws Exception
      */
-    public function save($id, $data): mixed
+    public function save($id, $data)
     {
+        dump($data);
         if ($id == 1) {
-            throw new Exception("Não é possível editar o grupo do super usuario");
+            throw new Exception("Não é possível editar o group do super usuario");
         }
         if ($id == 0) {
-            $grupo = new UsersGroup();
+            $group = new UsersGroup();
         } else {
-            $grupo = $this->em
+            $group = $this->em
                 ->getRepository(UsersGroup::class)
                 ->find($data["id"]);
         }
 
-        $grupo->setName($data["nome"]);
-        $this->em->persist($grupo);
+        $group->setName($data["name"]);
+        $this->em->persist($group);
 
-        // save the permissions
         // first clean all
-        $this->em->getRepository(Permissions::class)->clean($grupo->getId());
+        $permissions = $this->em->getRepository(Permissions::class)->findBy(array('group' => $group));
+        foreach ($permissions as $p) {
+            $this->em->remove($p);
+        }
 
-
-        foreach ($data["permissoes"] as $k => $v) {
+        foreach ($data["permissions"] as $k => $v) {
             if ($v) {
-                $permissao = new Permissions();
-                $permissao->setGroup($grupo);
-                $permissao->setIsOpen(true);
-                $permissao->setRoute($k);
-                $this->em->persist($permissao);
+                $permissions = new Permissions();
+                $permissions->setGroup($group);
+                $permissions->setIsOpen(true);
+                $permissions->setRoute($k);
+                $this->em->persist($permissions);
             }
         }
 
         $this->em->flush();
 
-        return $grupo->getId();
+        return $group->getId();
     }
 
     /**
@@ -92,5 +99,10 @@ class PermissionsAdapter extends AbstractAdapter
             $retorno[$p->getRoute()] = $p->getIsOpen();
         }
         return $retorno;
+    }
+
+    function fetch(?array $data, $id = null)
+    {
+        // TODO: Implement fetch() method.
     }
 }
