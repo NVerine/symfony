@@ -17,13 +17,11 @@ class User implements UserInterface
      * @ORM\Id()
      * @ORM\GeneratedValue()
      * @ORM\Column(type="integer")
-     * @Groups ({"user_default"})
      */
     private $id;
 
     /**
-     * @ORM\Column(type="string", length=180, unique=true)
-     * @Groups ({"user_default"})
+     * @ORM\Column(type="string", length=180, unique=true, nullable=false)
      */
     private $username;
 
@@ -33,22 +31,20 @@ class User implements UserInterface
     private $roles = [];
 
     /**
-     * @var string The hashed password
      * @ORM\Column(type="string")
      */
     private $password;
 
     /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\GrupoUsuarios", inversedBy="users")
-     * @ORM\JoinColumn(nullable=false)
+     * @ORM\ManyToOne(targetEntity="UsersGroup", inversedBy="users")
      */
-    private $grupo;
+    private $group;
 
     /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\Pessoa", inversedBy="user")
+     * @ORM\ManyToOne(targetEntity="App\Entity\Person", inversedBy="user", fetch="EXTRA_LAZY")
      * @ORM\JoinColumn(nullable=false)
      */
-    private $pessoa;
+    private $person;
 
      /**
       * @ORM\OneToMany(targetEntity=UserTokens::class, mappedBy="user", orphanRemoval=true)
@@ -56,58 +52,46 @@ class User implements UserInterface
      private $userTokens;
 
     /**
-     * @ORM\ManyToMany(targetEntity="Filial", inversedBy="usuarios")
+     * @ORM\ManyToMany(targetEntity="Branch", inversedBy="users")
      */
-    private $filiais;
+    private $branchs;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Filial", inversedBy="usuariosNaFilial")
+     * @ORM\ManyToOne(targetEntity="Branch", inversedBy="usersInBranch")
      * @ORM\JoinColumn(nullable=true)
      */
-    private $filialAtiva;
+    private $activeBranch;
 
      public function __construct()
      {
          $this->userTokens = new ArrayCollection();
-         $this->filiais = new ArrayCollection();
+         $this->branchs = new ArrayCollection();
      }
 
-    /**
-     * @return Collection|Filial[]
-     */
-    public function getFiliais(): ?Collection
+    public function getBranchs(): ?Collection
     {
-        return $this->filiais;
+        return $this->branchs;
     }
-    public function addFilais(Filial $filial): self
+    public function addBranchs(Branch $branch): self
     {
-        if (!$this->filiais->contains($filial)) {
-            $this->filiais[] = $filial;
+        if (!$this->branchs->contains($branch)) {
+            $this->branchs[] = $branch;
         }
         return $this;
     }
-    public function removeFiliais(Filial $filial): self
+    public function removeBranchs(Branch $branch): self
     {
-        if ($this->filiais->contains($filial)) {
-            $this->filiais->removeElement($filial);
+        if ($this->branchs->contains($branch)) {
+            $this->branchs->removeElement($branch);
         }
         return $this;
     }
-
-    /**
-     * @return mixed
-     */
 
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    /**
-     * A visual identifier that represents this user.
-     *
-     * @see UserInterface
-     */
     public function getUsername(): string
     {
         return (string) $this->username;
@@ -116,13 +100,9 @@ class User implements UserInterface
     public function setUsername(string $username): self
     {
         $this->username = $username;
-
         return $this;
     }
 
-    /**
-     * @see UserInterface
-     */
     public function getRoles(): array
     {
         $roles = $this->roles;
@@ -139,9 +119,6 @@ class User implements UserInterface
         return $this;
     }
 
-    /**
-     * @see UserInterface
-     */
     public function getPassword(): string
     {
         return (string) $this->password;
@@ -150,72 +127,54 @@ class User implements UserInterface
     public function setPassword(string $password): self
     {
         $this->password = $password;
-
         return $this;
     }
 
-    /**
-     * @see UserInterface
-     */
     public function getSalt()
     {
         // not needed when using the "bcrypt" algorithm in security.yaml
     }
 
-    /**
-     * @see UserInterface
-     */
     public function eraseCredentials()
     {
         // If you store any temporary, sensitive data on the user, clear it here
         // $this->plainPassword = null;
     }
 
-    public function getGrupo(): ?GrupoUsuarios
+    public function getGroup(): ?UsersGroup
     {
-        return $this->grupo;
+        return $this->group;
     }
 
-    public function setGrupo(?GrupoUsuarios $grupo): self
+    public function setGroup(UsersGroup $group): self
     {
-        $this->grupo = $grupo;
+        $this->group = $group;
+        return $this;
+    }
+
+    public function getPerson(): ?Person
+    {
+        return $this->person;
+    }
+
+    public function setPerson(Person $person): self
+    {
+        $this->person = $person;
 
         return $this;
     }
 
-    public function getNomeGrupo(): string
+    public function getActiveBranch(): ?Branch
     {
-        if(!empty($this->grupo))
-            return (string) $this->grupo->getNome();
-        return '';
+        return $this->activeBranch;
     }
 
-    public function getPessoa(): ?Pessoa
+    public function setActiveBranch(Branch $filial): self
     {
-        return $this->pessoa;
-    }
-
-    public function setPessoa(Pessoa $pessoa): self
-    {
-        $this->pessoa = $pessoa;
-
+        $this->activeBranch = $filial;
         return $this;
     }
 
-    public function getFilialAtiva(): ?Filial
-    {
-        return $this->filialAtiva;
-    }
-
-    public function setFilialAtiva(Filial $filial): self
-    {
-        $this->filialAtiva = $filial;
-        return $this;
-    }
-
-    /**
-     * @return Collection|UserTokens[]
-     */
     public function getUserTokens(): ?Collection
     {
         return $this->userTokens;

@@ -31,13 +31,13 @@ class UserTokensRepository extends ServiceEntityRepository
     public function getUserAuthenticated($token, $origin, $userAgent, $username)
     {
         // duração da sessão de 4 horas
-        $data = new \DateTime();
-        $data->modify('-4 hour');
+        $date = new \DateTime();
+        $date->modify('-4 hour');
 
         return $this->createQueryBuilder('t')
             ->leftJoin('t.user', 'u')->addSelect('u')
             ->andWhere('t.token = :token')
-            ->andWhere('t.data > :data')
+            ->andWhere('t.date > :date')
             ->andWhere('t.origin = :origin')
             ->andWhere('t.user_agent = :agent')
             ->andWhere('t.isActive = :active')
@@ -47,7 +47,7 @@ class UserTokensRepository extends ServiceEntityRepository
             ->setParameter('agent', $userAgent)
             ->setParameter('active', true)
             ->setParameter('username', $username)
-            ->setParameter('data', $data)
+            ->setParameter('date', $date)
             ->getQuery()
             ->getOneOrNullResult()
         ;

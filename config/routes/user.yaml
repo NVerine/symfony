@@ -1,0 +1,19 @@
+api_user_index:
+  path: /
+  controller: App\Controller\Api\UserController::index
+  methods: [GET]
+
+api_user_show:
+  path: /{id}
+  controller: App\Controller\Api\UserController::show
+  methods: [GET]
+
+api_user_edit:
+  path: /{id}/edit
+  controller: App\Controller\Api\UserController::edit
+  methods: [ GET, POST ]
+
+api_user_perfil_edit:
+  path: /account/{id}/edit
+  controller: App\Controller\Api\UserController::accountEdit
+  methods: [ GET, POST ]

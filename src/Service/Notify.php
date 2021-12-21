@@ -1,32 +1,32 @@
 <?php
 
-
 namespace App\Service;
 
-class Notify
+class Notify implements NotifyInterface
 {
-    const TIPO_ERROR = "danger";
-    const TIPO_WARNING = "warning";
-    const TIPO_INFO = "info";
-    const TIPO_SUCCESS = "success";
+    const ERROR = "danger";
+    const WARNING = "warning";
+    const INFO = "info";
+    const SUCCESS = "success";
 
-    private $mensagens = array();
+    private array $messages = array();
 
-    public function addMessage($tipo, $texto){
-        $this->mensagens[] = array(
-            "tipo" => $tipo,
-            "texto" => $texto
+    public function addMessage($type, $text){
+        $this->messages[] = array(
+            "type" => $type,
+            "text" => $text
         );
     }
 
     /**
-     * @param string $dados
+     * @param string $data
      * @return string
      */
-    public function newReturn(string $dados){
-        if(empty($dados)){
-            return '{"dados": "", "notify": '.json_encode($this->mensagens).'}';
+    public function newReturn($data): string
+    {
+        if(empty($data)){
+            return '{"data": "", "notify": '.json_encode($this->messages).'}';
         }
-        return '{"dados":'.$dados.', "notify": '.json_encode($this->mensagens).'}';
+        return '{"data":'.$data.', "notify": '.json_encode($this->messages).'}';
     }
 }

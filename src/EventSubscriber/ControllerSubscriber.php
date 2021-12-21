@@ -2,8 +2,9 @@
 
 namespace App\EventSubscriber;
 
-use App\Controller\Api\PermissoesController;
-use App\Entity\Permissoes;
+use App\Entity\Permissions;
+use App\Exception\BusinessException;
+use App\Repository\PermissionsRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\Session\Attribute\AttributeBag;
@@ -16,10 +17,16 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
 
 class ControllerSubscriber implements EventSubscriberInterface
 {
-    private $em;
-    private $tokenStorage;
-    private $session;
+    private EntityManagerInterface $em;
+    private TokenStorageInterface $tokenStorage;
+    private SessionInterface $session;
 
+    /**
+     * ControllerSubscriber constructor.
+     * @param TokenStorageInterface $tokenStorage
+     * @param EntityManagerInterface $em
+     * @param SessionInterface $session
+     */
     public function __construct(TokenStorageInterface $tokenStorage, EntityManagerInterface $em, SessionInterface $session)
     {
         $this->tokenStorage = $tokenStorage;
@@ -27,6 +34,9 @@ class ControllerSubscriber implements EventSubscriberInterface
         $this->session = $session;
     }
 
+    /**
+     * @return \array[][]
+     */
     public static function getSubscribedEvents(): array
     {
         return [
@@ -36,6 +46,9 @@ class ControllerSubscriber implements EventSubscriberInterface
         ];
     }
 
+    /**
+     * @throws BusinessException
+     */
     public function onKernelController(ControllerEvent $event)
     {
         if (!$event->isMasterRequest()) return;
@@ -47,29 +60,29 @@ class ControllerSubscriber implements EventSubscriberInterface
         $request = $event->getRequest();
         $route = $request->attributes->get('_route');
 
-        // salva as permissões na session, para minimizar os requests em bd
+        // save permission on session to lower DB usage
         //if (empty($this->session->get("permissoes"))){
         if ($token->getUser()) {
-            $grupo = $token->getUser()->getGrupo()->getId();
-            $permissoes = $this->em->getRepository(Permissoes::class)->findBy(array("grupo" => $grupo));
+            $grupo = $token->getUser()->getGroup()->getId();
+            $permissoes = $this->em->getRepository(Permissions::class)->findBy(array("group" => $grupo));
 
             $session = new Session(new NativeSessionStorage(), new AttributeBag());
-            $session->set('permissoes', $permissoes);
+            $session->set('permissions', $permissoes);
         }
         //}
 
         $bloqueado = true;
 
-        if (!in_array($route, PermissoesController::$rotas_bloqueadas)) {
-            // superadmin tem bypass no dev
-            if ($user->getGrupo()->getId() == 1) return;
+        if (!in_array($route, PermissionsRepository::$blocked_routes)) {
+            // superadmin has bypass on dev
+            if ($user->getGroup()->getId() == 1) return;
 
-            $permissoes = $this->session->get("permissoes");
+            $permissoes = $this->session->get("permissions");
             /**
-             * @var $p Permissoes
+             * @var $p Permissions
              */
             foreach ($permissoes as $p) {
-                if ($p->getRota() == $route || substr($route, 0, 1) == "_") {
+                if ($p->getRoute() == $route || substr($route, 0, 1) == "_") {
                     $bloqueado = false;
                     break;
                 }
@@ -77,7 +90,7 @@ class ControllerSubscriber implements EventSubscriberInterface
         }
 
         if ($bloqueado) {
-            throw new \Exception("<b>Sem permissão nesta rota</b> '" . $route . "'");
+            throw new BusinessException("No permission in this route '{$route}'");
         }
     }
 }

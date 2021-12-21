@@ -13,21 +13,18 @@ use Symfony\Component\HttpFoundation\Request;
 class SQLHelper
 {
     /**
-     * @param Request $request
+     * @param array|null $data
      * @param QueryBuilder $queryBuilder
-     * @return string
      */
-    public static function setPagination(Request $request, QueryBuilder $queryBuilder)
+    public static function setPagination(?array $data, QueryBuilder &$queryBuilder)
     {
-        $limit = $request->query->get('pesq_limite');
-        $pag = $request->query->get('pesq_offset');
-        if (!empty($pag) && !empty($limit)) {
-            $pag = $pag * $limit;
+        if(isset($data["search_limit"]) && !empty($data["search_limit"])){
+            $queryBuilder->setMaxResults($data["search_limit"]);
+
+            if(isset($data["search_offset"]) && !empty($data["search_offset"])){
+                $queryBuilder->setFirstResult($data["search_offset"] * $data["search_limit"]);
+            }
         }
-
-        $queryBuilder->setFirstResult($pag)->setMaxResults($limit);
-
-        return $queryBuilder;
     }
 
     /**
@@ -38,7 +35,6 @@ class SQLHelper
     public static function getResultsOrNull($qb): ?array
     {
         $retorno = $qb->getQuery()
-        ->setHint(Query::HINT_FORCE_PARTIAL_LOAD, true)
         ->getResult();
         if(empty($retorno)) return null;
         return $retorno;

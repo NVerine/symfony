@@ -1,0 +1,20 @@
+api_person_index:
+  path: /
+  controller: App\Controller\Api\PersonController::index
+  methods: [GET]
+
+api_person_show:
+  path: /{id}
+  controller: App\Controller\Api\PersonController::show
+  methods: [GET]
+
+api_branch_edit:
+  path: /{id}/edit
+  controller: App\Controller\Api\PersonController::edit
+  methods: [ GET, POST ]
+
+_api_person_autocomplete_nome:
+  path: /autocomplete/nome
+  controller: App\Controller\Api\PersonController::autocomplete
+  methods: [ GET ]
+
