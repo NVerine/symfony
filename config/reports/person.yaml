@@ -1,0 +1,23 @@
+name: person
+columns:
+  - id
+  - type
+  - name
+  - nickname
+  - observations
+  - birthDate
+  - isActive
+  - isCustomer
+  - isSupplier
+  - isEmployee
+  - uf
+  - city
+  - address
+  - district
+  - addressComplement
+  - number
+  - zip
+  - ibgeCidade
+  - contactName
+  - phone
+  - email
